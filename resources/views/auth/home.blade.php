@@ -35,9 +35,9 @@
 
             <div class="row g-4">
                 @php
-                    // Mengambil ID asli secara aman dari database berdasarkan nama produk Anda
-                    $p1 = \App\Models\Product::where('name', 'like', '%Oversized Black%')->first();
-                    $p2 = \App\Models\Product::where('name', 'like', '%Navy Premium%')->first();
+                    // MENGOPTIMALKAN PENCARIAN AGAR JAUH LEBIH FLEKSIBEL DAN TIDAK MUDAH NULL
+                    $p1 = \App\Models\Product::where('name', 'like', '%Acid Wash Black%')->first();
+                    $p2 = \App\Models\Product::where('name', 'like', '%Heavyweight Boxy Hoodie%')->first();
                     $p3 = \App\Models\Product::where('name', 'like', '%Gothic Yellow%')->first();
                     $p4 = \App\Models\Product::where('name', 'like', '%Minimalist Core%')->first();
                 @endphp
@@ -45,104 +45,120 @@
                 {{-- PRODUK 1 --}}
                 <div class="col-md-6 col-lg-3 reveal">
                     <div class="product-card">
-                        <a href="{{ $p1 ? route('product.show', $p1->id) : '#' }}" class="text-decoration-none">
-                            <div class="product-img-container">
-                                <img src="{{ asset('assets/kategori/product1.png') }}" alt="Oversized T-Shirt">
-                            </div>
-                        </a>
-                        <div class="product-info">
-                            <span class="product-category">T-SHIRTS</span>
-                            <a href="{{ $p1 ? route('product.show', $p1->id) : '#' }}" class="text-decoration-none text-white">
-                                <h5 class="mt-2 product-title-hover">Oversized Black Minimalist</h5>
+                        @if($p1)
+                            <a href="{{ route('product.show', $p1->id) }}" class="text-decoration-none">
+                                <div class="product-img-container">
+                                    <img src="{{ asset('assets/kaos/t-shirt3.png') }}" alt="Acid Wash Black">
+                                </div>
                             </a>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="fw-bold fs-5 text-primary">Rp 185.000</span>
-                                <form action="{{ route('cart.add', $p1 ? $p1->id : 1) }}" method="POST" class="m-0">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-premium" title="Tambah ke Keranjang">
-                                        <i class="bi bi-plus-lg"></i>
-                                    </button>
-                                </form>
+                            <div class="product-info">
+                                <span class="product-category">T-SHIRTS</span>
+                                <a href="{{ route('product.show', $p1->id) }}" class="text-decoration-none text-white">
+                                    <h5 class="mt-2 product-title-hover">{{ $p1->name }}</h5>
+                                </a>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="fw-bold fs-5 text-primary">Rp {{ number_format($p1->price, 0, ',', '.') }}</span>
+                                    <form action="{{ route('cart.add', $p1->id) }}" method="POST" class="m-0">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-premium" title="Tambah ke Keranjang">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-                        </div>
+                        @else
+                            <div class="p-3 border border-secondary rounded text-muted text-center small">Produk "Acid Wash Black" Belum Ada di DB</div>
+                        @endif
                     </div>
                 </div>
 
                 {{-- PRODUK 2 --}}
                 <div class="col-md-6 col-lg-3 reveal">
                     <div class="product-card">
-                        <a href="{{ $p2 ? route('product.show', $p2->id) : '#' }}" class="text-decoration-none">
-                            <div class="product-img-container">
-                                <img src="{{ asset('assets/kategori/product2.png') }}" alt="Streetwear Hoodie">
-                            </div>
-                        </a>
-                        <div class="product-info">
-                            <span class="product-category">HOODIES</span>
-                            <a href="{{ $p2 ? route('product.show', $p2->id) : '#' }}" class="text-decoration-none text-white">
-                                <h5 class="mt-2 product-title-hover">Navy Premium Street Hoodie</h5>
+                        @if($p2)
+                            <a href="{{ route('product.show', $p2->id) }}" class="text-decoration-none">
+                                <div class="product-img-container">
+                                    <img src="{{ asset('assets/hodie/hoodies1.png') }}" alt="Heavyweight Boxy Hoodie">
+                                </div>
                             </a>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="fw-bold fs-5 text-primary">Rp 350.000</span>
-                                <form action="{{ route('cart.add', $p2 ? $p2->id : 2) }}" method="POST" class="m-0">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-premium" title="Tambah ke Keranjang">
-                                        <i class="bi bi-plus-lg"></i>
-                                    </button>
-                                </form>
+                            <div class="product-info">
+                                <span class="product-category">HOODIES</span>
+                                <a href="{{ route('product.show', $p2->id) }}" class="text-decoration-none text-white">
+                                    <h5 class="mt-2 product-title-hover">{{ $p2->name }}</h5>
+                                </a>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="fw-bold fs-5 text-primary">Rp {{ number_format($p2->price, 0, ',', '.') }}</span>
+                                    <form action="{{ route('cart.add', $p2->id) }}" method="POST" class="m-0">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-premium" title="Tambah ke Keranjang">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-                        </div>
+                        @else
+                            <div class="p-3 border border-secondary rounded text-muted text-center small">Produk "Heavyweight Boxy Hoodie" Belum Ada di DB</div>
+                        @endif
                     </div>
                 </div>
 
                 {{-- PRODUK 3 --}}
                 <div class="col-md-6 col-lg-3 reveal">
                     <div class="product-card">
-                        <a href="{{ $p3 ? route('product.show', $p3->id) : '#' }}" class="text-decoration-none">
-                             <div class="product-img-container">
-                                <img src="{{ asset('assets/kategori/product3.png') }}" alt="Gothic Yellow Oversized">
-                            </div>
-                        </a>
-                        <div class="product-info">
-                            <span class="product-category">T-SHIRT</span>
-                            <a href="{{ $p3 ? route('product.show', $p3->id) : '#' }}" class="text-decoration-none text-white">
-                                <h5 class="mt-2 product-title-hover">Gothic Yellow Oversized</h5>
+                        @if($p3)
+                            <a href="{{ route('product.show', $p3->id) }}" class="text-decoration-none">
+                                 <div class="product-img-container">
+                                    <img src="{{ asset('assets/kaos/t-shirt1.png') }}" alt="Gothic Yellow Oversized">
+                                </div>
                             </a>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="fw-bold fs-5 text-primary">Rp 189.000</span>
-                                <form action="{{ route('cart.add', $p3 ? $p3->id : 3) }}" method="POST" class="m-0">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-premium" title="Tambah ke Keranjang">
-                                        <i class="bi bi-plus-lg"></i>
-                                    </button>
-                                </form>
+                            <div class="product-info">
+                                <span class="product-category">T-SHIRT</span>
+                                <a href="{{ route('product.show', $p3->id) }}" class="text-decoration-none text-white">
+                                    <h5 class="mt-2 product-title-hover">{{ $p3->name }}</h5>
+                                </a>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="fw-bold fs-5 text-primary">Rp {{ number_format($p3->price, 0, ',', '.') }}</span>
+                                    <form action="{{ route('cart.add', $p3->id) }}" method="POST" class="m-0">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-premium" title="Tambah ke Keranjang">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-                        </div>
+                        @else
+                            <div class="p-3 border border-secondary rounded text-muted text-center small">Produk "Gothic Yellow" Belum Ada di DB</div>
+                        @endif
                     </div>
                 </div>
 
                 {{-- PRODUK 4 --}}
                 <div class="col-md-6 col-lg-3 reveal">
                     <div class="product-card">
-                        <a href="{{ $p4 ? route('product.show', $p4->id) : '#' }}" class="text-decoration-none">
-                            <div class="product-img-container">
-                                <img src="{{ asset('assets/kategori/product4.png') }}" alt="Minimalist Core White">
-                            </div>
-                        </a>
-                        <div class="product-info">
-                            <span class="product-category">T-SHIRTS</span>
-                            <a href="{{ $p4 ? route('product.show', $p4->id) : '#' }}" class="text-decoration-none text-white">
-                                <h5 class="mt-2 product-title-hover">Minimalist Core White</h5>
+                        @if($p4)
+                            <a href="{{ route('product.show', $p4->id) }}" class="text-decoration-none">
+                                <div class="product-img-container">
+                                    <img src="{{ asset('assets/kaos/t-shirt2.png') }}" alt="Minimalist Core White">
+                                </div>
                             </a>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="fw-bold fs-5 text-primary">Rp 175.000</span>
-                                <form action="{{ route('cart.add', $p4 ? $p4->id : 4) }}" method="POST" class="m-0">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-premium" title="Tambah ke Keranjang">
-                                        <i class="bi bi-plus-lg"></i>
-                                    </button>
-                                </form>
+                            <div class="product-info">
+                                <span class="product-category">T-SHIRTS</span>
+                                <a href="{{ route('product.show', $p4->id) }}" class="text-decoration-none text-white">
+                                    <h5 class="mt-2 product-title-hover">{{ $p4->name }}</h5>
+                                </a>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="fw-bold fs-5 text-primary">Rp {{ number_format($p4->price, 0, ',', '.') }}</span>
+                                    <form action="{{ route('cart.add', $p4->id) }}" method="POST" class="m-0">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-premium" title="Tambah ke Keranjang">
+                                            <i class="bi bi-plus-lg"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-                        </div>
+                        @else
+                            <div class="p-3 border border-secondary rounded text-muted text-center small">Produk "Minimalist Core" Belum Ada di DB</div>
+                        @endif
                     </div>
                 </div>
             </div>
