@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payment', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+        Schema::create('categories', function (Blueprint $table) {
+    $table->id();
+    $table->string('name', 100)->unique();
+    $table->timestamps();
+});
     }
 
     /**
@@ -22,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payment');
+        Schema::dropIfExists('categories');
     }
 };
