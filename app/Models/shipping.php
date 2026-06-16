@@ -6,10 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Shipping extends Model
 {
-    // Tambahkan baris ini untuk mempertegas nama tabel di database
     protected $table = 'shipping';
 
     protected $fillable = [
-        'order_id', 'courier', 'address', 'shipping_cost', 'status'
+        'order_id',
+        'address',
+        'city',
+        'postal_code',
+        'courier',
+        'shipping_cost',
+        'status'
     ];
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
 }

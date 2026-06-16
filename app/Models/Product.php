@@ -6,5 +6,28 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    //
+    protected $table = 'products';
+
+    protected $fillable = [
+        'category_id',
+        'name',
+        'price',
+        'image',
+        'description'
+    ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function cartDetails()
+    {
+        return $this->hasMany(CartDetail::class);
+    }
+
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class);
+    }
 }

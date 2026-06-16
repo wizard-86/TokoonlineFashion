@@ -9,21 +9,35 @@ class Order extends Model
 {
     use HasFactory;
 
-    protected $table = 'orders'; // Menghubungkan ke tabel orders di Navicat
+    protected $table = 'orders';
 
     protected $fillable = [
         'user_id',
         'invoice',
         'total_price',
-        'status',
         'address',
         'courier',
-        'shipping_cost'
+        'shipping_cost',
+        'status'
     ];
 
-    // Relasi ke detail order
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function details()
     {
-        return $this->hasMany(OrderDetail::class, 'order_id');
+        return $this->hasMany(OrderDetail::class);
+    }
+
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
+
+    public function shipping()
+    {
+        return $this->hasOne(Shipping::class);
     }
 }

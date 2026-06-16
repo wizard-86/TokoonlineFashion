@@ -9,7 +9,7 @@ class OrderDetail extends Model
 {
     use HasFactory;
 
-    protected $table = 'order_details'; // Menghubungkan ke tabel order_details di Navicat
+    protected $table = 'order_details';
 
     protected $fillable = [
         'order_id',
@@ -18,9 +18,13 @@ class OrderDetail extends Model
         'price'
     ];
 
-    // Relasi balik ke produk agar bisa tahu nama produk yang dibeli
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
     public function product()
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(Product::class);
     }
 }
