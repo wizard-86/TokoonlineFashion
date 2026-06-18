@@ -27,26 +27,31 @@ class AuthController extends Controller
     */
 
     public function register(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|max:100',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'required|max:20',
-            'password' => 'required|min:6|confirmed',
-        ]);
+{
+    $validated = $request->validate([
+        'name' => 'required|max:255',
+        'email' => 'required|email|unique:users,email',
+        'phone' => 'required|max:20',
+        'password' => 'required|min:6|confirmed',
+    ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'role' => 'customer',
-            'password' => Hash::make($request->password),
-        ]);
+    $user = User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'phone' => $validated['phone'],
+        'password' => Hash::make($validated['password']),
+        'role' => 'customer',
+    ]);
 
-        return redirect()
-            ->route('login')
-            ->with('success', 'Registrasi berhasil. Silakan login.');
-    }
+    // Login otomatis
+    Auth::login($user);
+
+    // Regenerate session
+    $request->session()->regenerate();
+
+    return redirect()->route('/')
+        ->with('success', 'Akun berhasil dibuat.');
+}
 
     /*
     |--------------------------------------------------------------------------
@@ -56,7 +61,7 @@ class AuthController extends Controller
 
     public function showLogin()
     {
-        return view('login');
+        return view('auth.login');
     }
 
     /*
