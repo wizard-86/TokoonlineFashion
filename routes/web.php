@@ -1,85 +1,93 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PageController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
-| 1. KELOMPOK GUEST (PENGUNJUNG BELUM LOGIN)
+| PUBLIC / GUEST
 |--------------------------------------------------------------------------
 */
-Route::middleware(['guest'])->group(function () {
-    // Halaman Landing / Welcome Awal
-    Route::get('/', [PageController::class, 'home'])->name('landing');
 
-    // Fitur Login
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::get('/', function () {
+    return view('welcome');
+})->name('welcome');
 
-    // Fitur Register
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
+/*
+|--------------------------------------------------------------------------
+| AUTH
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('guest')->group(function () {
+
+    // Login
+    Route::get('/login', [AuthController::class, 'showLogin'])
+        ->name('login');
+
+    Route::post('/login', [AuthController::class, 'login'])
+        ->name('login.submit');
+
+    // Register
+    Route::get('/register', [AuthController::class, 'showRegister'])
+        ->name('register');
+
+    Route::post('/register', [AuthController::class, 'register'])
+        ->name('register.submit');
 });
 
 /*
 |--------------------------------------------------------------------------
-| 2. KELOMPOK AUTH (WAJIB LOG IN TERLEBIH DAHULU)
+| CUSTOMER
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
 
-    // Dashboard Utama setelah sukses login
-    Route::get('/home', [PageController::class, 'dashboard'])->name('home');
+Route::middleware('auth')->group(function () {
 
-    // Navigasi Menu Statis / Informasi Toko
-    Route::get('/about', [PageController::class, 'about'])->name('about');
-    Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+    // Collection
+    Route::get('/collection', [ProductController::class, 'index'])
+        ->name('search2');
 
-    // ====== FITUR KATALOG PRODUK & SEARCH ======
-    // Menampilkan halaman semua koleksi pakaian distro
-    Route::get('/collection', [ProductController::class, 'index'])->name('collection');
-    // Fitur pencarian baju cepat
-    Route::get('/search', [PageController::class, 'search'])->name('search');
-    // Menampilkan detail item baju tertentu
-    Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.show');
+    // Detail Produk
+    Route::get('/product/{id}', [ProductController::class, 'show'])
+        ->name('product.show');
 
-    // ====== FITUR KERANJANG BELANJA (CART SYSTEM) ======
-    // Menampilkan daftar belanjaan sementara
-    Route::get('/cart', [CartController::class, 'index'])->name('cart');
-    // Sinkronisasi alternatif jika rute memanggil name 'cart.index'
-    Route::get('/cart-view', [CartController::class, 'index'])->name('cart.index');
-    // Memproses penambahan baju baru ke keranjang
-    Route::post('/cart/add/{id}', [CartController::class, 'addToCart'])->name('cart.add');
-    // Memperbarui jumlah kuantitas baju (tambah/kurang)
-    Route::put('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
-    // Menghapus baris baju tertentu dari daftar keranjang
-    Route::delete('/cart/delete/{id}', [CartController::class, 'destroy'])->name('cart.destroy');
+    // Cart
+    Route::post('/cart/add/{id}', [CartController::class, 'add'])
+        ->name('cart.add');
 
-    // ====== FITUR CHECKOUT (KASIR UTAMA) ======
-    // Menampilkan form alamat & kurir bertema hitam premium
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    // SINKRONISASI UTAMA: Memproses checkout dengan nama route 'checkout.store' sesuai Form Blade
-    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.store');
+    Route::get('/cart', [CartController::class, 'index'])
+        ->name('cart');
 
-    // ====== FITUR MANAJEMEN TRANSAKSI / ORDER ======
-    // Menampilkan halaman instruksi pembayaran setelah checkout sukses
-    Route::get('/order/{id}/payment', [OrderController::class, 'showPaymentPage'])->name('order.payment');
+    // Checkout
+    Route::get('/checkout', [CartController::class, 'checkout'])
+        ->name('checkout');
 
-    // Riwayat daftar pesanan user
-    Route::get('/profile/orders', [OrderController::class, 'history'])->name('profile.orders');
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'index'])
+        ->name('profile');
 
-    // ====== MANAJEMEN DASBOR AKUN PROFIL ======
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
-    Route::get('/profile/dikirim', [ProfileController::class, 'dikirim'])->name('profile.dikirim');
-    Route::get('/profile/dinilai', [ProfileController::class, 'dinilai'])->name('profile.dinilai');
-    Route::get('/profile/voucher', [ProfileController::class, 'voucher'])->name('profile.voucher');
-
-    // Tombol Keluar Sistem
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    // Logout
+    Route::post('/logout', [AuthController::class, 'logout'])
+        ->name('logout');
 });
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        Route::get('/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('dashboard');
+
+    });

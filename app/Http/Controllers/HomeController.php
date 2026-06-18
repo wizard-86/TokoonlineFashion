@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-class CheckoutController extends Controller
+class HomeController extends Controller
 {
     public function index()
     {
-        return view('checkout');
+        return view('auth.welcome');
     }
 }

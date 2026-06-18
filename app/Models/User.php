@@ -11,10 +11,22 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 // Tambahkan 'phone' dan 'role' ke dalam array Fillable di bawah ini
-#[Fillable(['name', 'email', 'password', 'phone', 'role'])]
-#[Hidden(['password', 'remember_token'])]
+// #[Fillable(['name', 'email', 'password', 'phone', 'role'])]
+// #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
+    protected $fillable = [
+    'name',
+    'email',
+    'phone',
+    'role',
+    'password',
+];
+
+protected $hidden = [
+    'password',
+    'remember_token',
+];
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 

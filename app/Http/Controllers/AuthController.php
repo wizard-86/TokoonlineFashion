@@ -2,82 +2,109 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User; // Ditambahkan untuk mengakses tabel users di database
-use Illuminate\Support\Facades\Hash; // Ditambahkan untuk mengamankan/mengenkripsi password
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // 1. Menampilkan halaman form login
-    public function showLogin()
+    /*
+    |--------------------------------------------------------------------------
+    | FORM REGISTER
+    |--------------------------------------------------------------------------
+    */
+
+    public function showRegister()
     {
-        return view('auth.login');
+        return view('register');
     }
 
-    // 2. Memproses data dari form login
+    /*
+    |--------------------------------------------------------------------------
+    | PROSES REGISTER
+    |--------------------------------------------------------------------------
+    */
+
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|max:100',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|max:20',
+            'password' => 'required|min:6|confirmed',
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'role' => 'customer',
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()
+            ->route('login')
+            ->with('success', 'Registrasi berhasil. Silakan login.');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | FORM LOGIN
+    |--------------------------------------------------------------------------
+    */
+
+    public function showLogin()
+    {
+        return view('login');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | PROSES LOGIN
+    |--------------------------------------------------------------------------
+    */
+
     public function login(Request $request)
     {
-        // Validasi input wajib diisi
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
         ]);
 
-        // Menggunakan fitur Auth bawaan Laravel untuk cek email & password
-        if (Auth::attempt($credentials)) {
-            // Amankan session user
-            $request->session()->regenerate();
-
-            // Jika sukses login, arahkan ke halaman /home
-            return redirect()->intended('/home');
+        if (! Auth::attempt($credentials)) {
+            return back()
+                ->withErrors([
+                    'login_error' => 'Email atau password salah.'
+                ])
+                ->withInput();
         }
 
-        // Jika salah, kembalikan ke halaman login dengan pesan error
-        return back()->withErrors([
-            'login_error' => 'Email atau password yang kamu masukkan salah.',
-        ])->onlyInput('email');
+        $request->session()->regenerate();
+
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('search2');
     }
 
-    // 3. Menampilkan halaman form register akun baru
-    public function showRegister()
-    {
-        return view('auth.register');
-    }
+    /*
+    |--------------------------------------------------------------------------
+    | LOGOUT
+    |--------------------------------------------------------------------------
+    */
 
-    // 4. Memproses data pendaftaran akun baru (Register)
-    public function register(Request $request)
-    {
-        // Validasi input data register
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed', // 'confirmed' mewajibkan field password_confirmation
-        ]);
-
-        // Simpan data user baru ke database
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password), // Password wajib di-hash demi keamanan
-        ]);
-
-        // Otomatis buatkan session login setelah sukses mendaftar
-        Auth::login($user);
-
-        // Alihkan langsung ke dashboard utama belanja
-        return redirect()->route('home')->with('success', 'Akun berhasil dibuat! Selamat datang.');
-    }
-
-    // 5. Memproses Logout (Keluar Sistem)
     public function logout(Request $request)
     {
-        // Hapus status login
         Auth::logout();
+
         $request->session()->invalidate();
+
         $request->session()->regenerateToken();
 
-        // Setelah logout, tendang balik ke landing page awal (/)
-        return redirect('/');
+        return redirect()->route('welcome');
     }
 }
