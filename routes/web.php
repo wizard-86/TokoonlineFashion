@@ -12,9 +12,9 @@ use App\Http\Controllers\ProfileController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+Route::get('/', [ProductController::class, 'index'])->name('welcome');
+        
+
 
 /*
 |--------------------------------------------------------------------------
@@ -46,10 +46,6 @@ Route::middleware('guest')->group(function () {
 */
 
 Route::middleware('auth')->group(function () {
-
-    // Collection
-    Route::get('/collection', [ProductController::class, 'index'])
-        ->name('search2');
 
     // Detail Produk
     Route::get('/product/{id}', [ProductController::class, 'show'])

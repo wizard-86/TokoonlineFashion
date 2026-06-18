@@ -17,7 +17,7 @@ class AuthController extends Controller
 
     public function showRegister()
     {
-        return view('register');
+        return view('auth.register');
     }
 
     /*
@@ -49,7 +49,7 @@ class AuthController extends Controller
     // Regenerate session
     $request->session()->regenerate();
 
-    return redirect()->route('/')
+    return redirect()->route('welcome')
         ->with('success', 'Akun berhasil dibuat.');
 }
 
@@ -93,7 +93,7 @@ class AuthController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        return redirect()->route('search2');
+        return redirect()->route('welcome');
     }
 
     /*
