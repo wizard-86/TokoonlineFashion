@@ -32,7 +32,7 @@ class CartController extends Controller
     /**
      * 2. Memproses Tambah Barang dari Halaman Toko/Koleksi
      */
-    public function addToCart(Request $request, $id)
+    public function addToCart(Request $request, int $id)
     {
         $product = Product::findOrFail($id);
         $userId = Auth::id();
@@ -68,7 +68,7 @@ class CartController extends Controller
      * 3. Memperbarui Jumlah Kuantitas Barang (Tambah / Kurang)
      * Ditambahkan logika pintar: Jika kuantitas diubah menjadi 0 atau kurang, otomatis HAPUS barang.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $request->validate([
             'quantity' => 'required|integer'
@@ -93,7 +93,7 @@ class CartController extends Controller
     /**
      * 4. Menghapus Barang Secara Langsung Melalui Tombol Trash/Hapus
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         $cartDetail = CartDetail::findOrFail($id);
         $cartDetail->delete();
