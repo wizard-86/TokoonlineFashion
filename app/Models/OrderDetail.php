@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderDetail extends Model
 {
     use HasFactory;
 
-    protected $table = 'order_details'; // Menghubungkan ke tabel order_details di Navicat
+    protected $table = 'order_details';
 
     protected $fillable = [
         'order_id',
@@ -18,9 +19,19 @@ class OrderDetail extends Model
         'price'
     ];
 
-    // Relasi balik ke produk agar bisa tahu nama produk yang dibeli
-    public function product()
+    /**
+     * Relasi balik ke model Order
+     */
+    public function order(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'product_id');
+        return $this->belongsTo(Order::class, 'order_id', 'id');
+    }
+
+    /**
+     * Relasi ke model Product
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'product_id', 'id');
     }
 }

@@ -2,31 +2,53 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
-    // Halaman Utama Profil (Menampilkan Barang Dikemas)
     public function index()
     {
-        return view('profile.dikemas');
+        $user = Auth::user();
+        return view('auth.profile', compact('user'));
     }
 
-    // Halaman Barang Dikirim
+    public function dikemas()
+    {
+        // Mengambil pesanan yang berstatus pending / sedang dikemas
+        $orders = Order::with(['orderDetails.product', 'payment', 'shipping'])
+            ->where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        return view('profile.dikemas', compact('orders'));
+    }
+
     public function dikirim()
     {
-        return view('profile.dikirim');
+        // Mengambil pesanan yang sedang dalam proses kurir pengiriman
+        $orders = Order::with(['orderDetails.product', 'shipping'])
+            ->where('user_id', Auth::id())
+            ->whereHas('shipping', function($query) {
+                $query->where('status', 'shipping');
+            })
+            ->latest()
+            ->get();
+
+        return view('profile.dikirim', compact('orders'));
     }
 
-    // Halaman Barang Dinilai
     public function dinilai()
     {
-        return view('profile.dinilai');
-    }
+        // Mengambil riwayat pesanan selesai yang siap diberikan ulasan
+        $orders = Order::with(['orderDetails.product'])
+            ->where('user_id', Auth::id())
+            ->where('status', 'completed')
+            ->latest()
+            ->get();
 
-    // Halaman Diskon & Voucher
-    public function voucher()
-    {
-        return view('profile.voucher');
+        return view('profile.dinilai', compact('orders'));
     }
 }
