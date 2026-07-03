@@ -6,68 +6,45 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
+// === PUBLIC ROUTES (Bisa diakses siapa saja tanpa login) ===
+Route::get('/', [PageController::class, 'welcome'])->name('welcome');
+Route::get('/product/{id}', [PageController::class, 'productDetail'])->name('product.detail');
 
-// === GUEST ROUTES (Halaman Publik / Belum Login) ===
+// === GUEST ROUTES (Hanya untuk yang BELUM login) ===
 Route::middleware('guest')->group(function () {
-    // Halaman Awal Aplikasi
-    Route::get('/', [PageController::class, 'welcome'])->name('welcome');
-
-    // Autentikasi (Login & Register)
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 });
 
-
-// === AUTH ROUTES (Halaman Proteksi / Harus Login Dahulu) ===
+// === AUTH ROUTES (Hanya untuk yang SUDAH login) ===
 Route::middleware('auth')->group(function () {
-
-    // Keluar Aplikasi
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Beranda & Eksplorasi Produk
     Route::get('/home', [PageController::class, 'home'])->name('home');
     Route::get('/collection', [PageController::class, 'collection'])->name('collection');
-    Route::get('/product/{id}', [PageController::class, 'productDetail'])->name('product.detail');
-    Route::get('/search', [PageController::class, 'search'])->name('search');
-    Route::get('/search2', [PageController::class, 'search2'])->name('search2');
-
-    // Halaman Informasi Statis
     Route::get('/about', [PageController::class, 'about'])->name('about');
     Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 
-    // --- MANAJEMEN KERANJANG BELANJA (Cart) ---
+    // Keranjang
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
-    Route::put('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
-    Route::delete('/cart/{id}', [CartController::class, 'destroy'])->name('cart.destroy');
+    Route::post('/cart/add/{product_id}', [CartController::class, 'store'])->name('cart.add');
+    Route::put('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/delete/{id}', [CartController::class, 'destroy'])->name('cart.destroy');
 
-    // --- PROSES TRANSAKSI (Checkout) ---
+    // Checkout & Order
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
-
-    // --- RIWAYAT PESANAN & PEMBAYARAN (Order) ---
+    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.store');
     Route::get('/order/{id}/payment', [OrderController::class, 'showPayment'])->name('order.payment');
     Route::post('/order/{id}/payment', [OrderController::class, 'confirmPayment'])->name('order.payment.confirm');
 
-    // --- PROFIL PENGGUNA & STATUS PESANAN (Profile) ---
+    // Profil
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'index'])->name('index');
-        Route::put('/update', [UserController::class, 'updateProfile'])->name('update');
-
-        // Status Pengiriman Paket (Sesuai folder views/profile/)
         Route::get('/dikemas', [ProfileController::class, 'dikemas'])->name('dikemas');
         Route::get('/dikirim', [ProfileController::class, 'dikirim'])->name('dikirim');
-        Route::get('/dinilai', [ProfileController::class, 'dinilai'])->name('dinilai');
     });
-
 });

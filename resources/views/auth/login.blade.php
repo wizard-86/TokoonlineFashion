@@ -10,12 +10,12 @@
 
                 <div class="card bg-dark rounded-4 border border-secondary p-4 p-sm-5 shadow-lg">
                     <div class="text-center mb-4">
-                        <h2 class="fw-bold text-white tracking-wide">URBAN<span class="text-primary">VIBE</span></h2>
+                        <h2 class="fw-bold text-white tracking-wide">URBAN<span class=\"text-primary\">VIBE</span></h2>
                         <p class="text-secondary small">Masuk untuk mengakses koleksi penuh & profile kamu</p>
                     </div>
 
                     @if($errors->has('login_error'))
-                        <div class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger small rounded-3 mb-4">
+                        <div class=\"alert alert-danger bg-danger bg-opacity-10 border-danger text-danger small rounded-3 mb-4\">
                             {{ $errors->first('login_error') }}
                         </div>
                     @endif
@@ -38,12 +38,11 @@
                         </button>
                     </form>
 
-                    <!-- Tambahkan link ini di bawah tombol login atau di dalam card login -->
-<div class="mt-3 text-center">
-    <p class="text-secondary">Belum punya akun?
-        <a href="{{ route('register') }}" class="text-primary text-decoration-none fw-bold">Daftar Akun Baru</a>
-    </p>
-</div>
+                    <div class="mt-3 text-center">
+                        <p class="text-secondary">Belum punya akun?
+                            <a href="{{ route('register') }}" class="text-primary text-decoration-none fw-bold">Daftar Akun Baru</a>
+                        </p>
+                    </div>
                 </div>
 
             </div>
@@ -57,7 +56,7 @@
         background-color: rgba(255, 255, 255, 0.15) !important;
         border-color: #0d6efd !important;
         color: #fff !important;
-        box-shadow: 0 0 8px rgba(13, 110, 253, 0.25);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
     }
 </style>
 @endsection

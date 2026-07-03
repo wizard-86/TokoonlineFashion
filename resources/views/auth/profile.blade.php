@@ -13,8 +13,8 @@
                     <div class="mx-auto bg-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm mb-3" style="width: 80px; height: 80px;">
                         <i class="bi bi-person-fill fs-1 text-white"></i>
                     </div>
-                    <h4 class="fw-bold m-0 text-white">Nama Akun</h4>
-                    <p class="text-secondary small mb-4">user@urbanvibe.id</p>
+                    <h4 class="fw-bold m-0 text-white">{{ $user->name }}</h4>
+                    <p class="text-secondary small mb-4">{{ $user->email }}</p>
 
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
@@ -24,76 +24,54 @@
                     </form>
                 </div>
 
-                <div class="list-group list-group-custom rounded-4 border border-secondary overflow-hidden shadow-sm" id="profileTabs" role="tablist">
-                    <button class="list-group-item list-group-item-action bg-dark text-white border-0 border-bottom border-secondary p-3 active" id="dikemas-tab" data-bs-toggle="tab" data-bs-target="#dikemas" type="button" role="tab" aria-controls="dikemas" aria-selected="true">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div><i class="bi bi-box-seam text-primary me-3 fs-5"></i>Barang Dikemas</div>
-                            <span class="badge bg-secondary rounded-pill px-2.5 py-1 text-dark fw-bold">0</span>
-                        </div>
-                    </button>
-                    <button class="list-group-item list-group-item-action bg-dark text-white border-0 border-bottom border-secondary p-3" id="dikirim-tab" data-bs-toggle="tab" data-bs-target="#dikirim" type="button" role="tab" aria-controls="dikirim" aria-selected="false">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div><i class="bi bi-truck text-primary me-3 fs-5"></i>Barang Sudah Dikirim</div>
-                            <span class="badge bg-secondary rounded-pill px-2.5 py-1 text-dark fw-bold">0</span>
-                        </div>
-                    </button>
-                    <button class="list-group-item list-group-item-action bg-dark text-white border-0 border-bottom border-secondary p-3" id="dinilai-tab" data-bs-toggle="tab" data-bs-target="#dinilai" type="button" role="tab" aria-controls="dinilai" aria-selected="false">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div><i class="bi bi-star text-primary me-3 fs-5"></i>Barang Dinilai</div>
-                            <span class="badge bg-secondary rounded-pill px-2.5 py-1 text-dark fw-bold">0</span>
-                        </div>
-                    </button>
-                    <button class="list-group-item list-group-item-action bg-dark text-white border-0 p-3" id="voucher-tab" data-bs-toggle="tab" data-bs-target="#voucher" type="button" role="tab" aria-controls="voucher" aria-selected="false">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div><i class="bi bi-ticket-perforated text-primary me-3 fs-5"></i>Diskon & Voucher</div>
-                            <span class="badge bg-success text-white px-2.5 py-1 rounded-2 small-text" style="font-size: 0.75rem;">Diskon 15%</span>
-                        </div>
-                    </button>
+                <div class="list-group list-group-custom rounded-4 border border-secondary overflow-hidden shadow">
+                    <a href="{{ route('profile.index') }}" class="list-group-item list-group-item-action bg-dark text-white border-secondary py-3 px-4 active">
+                        <i class="bi bi-person-gear me-3 text-primary"></i>Informasi Akun
+                    </a>
+                    <a href="{{ route('profile.dikemas') }}" class="list-group-item list-group-item-action bg-dark text-white border-secondary py-3 px-4">
+                        <i class="bi bi-box-seam me-3 text-secondary"></i>Pesanan Dikemas
+                    </a>
+                    <a href="{{ route('profile.dikirim') }}" class="list-group-item list-group-item-action bg-dark text-white border-secondary py-3 px-4">
+                        <i class="bi bi-truck me-3 text-secondary"></i>Pesanan Dikirim
+                    </a>
+                    <a href="{{ route('profile.dinilai') }}" class="list-group-item list-group-item-action bg-dark text-white border-secondary py-3 px-4">
+                        <i class="bi bi-star me-3 text-secondary"></i>Riwayat & Ulasan
+                    </a>
                 </div>
             </div>
 
             <div class="col-lg-8">
-                <div class="tab-content id="profileTabsContent">
+                <div class="card bg-dark rounded-4 border border-secondary p-4 p-md-5 h-100 min-frame-height d-flex flex-column justify-content-between">
+                    <div>
+                        <h4 class="fw-bold mb-4 text-white pb-2 border-bottom border-secondary"><i class="bi bi-info-circle text-primary me-2"></i>Detail Akun</h4>
 
-                    <div class="tab-pane fade show active" id="dikemas" role="tabpanel" aria-labelledby="dikemas-tab">
-                        <div class="card bg-dark rounded-4 border border-secondary p-4 min-frame-height">
-                            <h5 class="fw-bold mb-4 border-bottom border-secondary pb-2"><i class="bi bi-box-seam text-primary me-2"></i>Daftar Barang Dikemas</h5>
-                            <div class="text-center py-5 my-3">
-                                <i class="bi bi-clock-history fs-1 text-secondary mb-3 d-block"></i>
-                                <p class="text-secondary mb-0">Belum ada pesanan yang sedang dikemas.</p>
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <span class="d-block text-secondary small fw-bold tracking-wide">NAMA LENGKAP</span>
+                                <span class="fs-5 fw-medium text-white">{{ $user->name }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="d-block text-secondary small fw-bold tracking-wide">EMAIL ADDRESS</span>
+                                <span class="fs-5 fw-medium text-white">{{ $user->email }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="d-block text-secondary small fw-bold tracking-wide">NOMOR TELEPON</span>
+                                <span class="fs-5 fw-medium text-white">{{ $user->phone ?? '-' }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="d-block text-secondary small fw-bold tracking-wide">ROLE MEMBER</span>
+                                <span class="badge bg-primary px-3 py-2 rounded-pill text-uppercase mt-1" style="font-size: 0.75rem;">{{ $user->role }}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="tab-pane fade" id="dikirim" role="tabpanel" aria-labelledby="dikirim-tab">
-                        <div class="card bg-dark rounded-4 border border-secondary p-4 min-frame-height">
-                            <h5 class="fw-bold mb-4 border-bottom border-secondary pb-2"><i class="bi bi-truck text-primary me-2"></i>Lacak Pengiriman</h5>
-                            <div class="text-center py-5 my-3">
-                                <i class="bi bi-card-list fs-1 text-secondary mb-3 d-block"></i>
-                                <p class="text-secondary mb-0">Tidak ada pengiriman aktif saat ini.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="dinilai" role="tabpanel" aria-labelledby="dinilai-tab">
-                        <div class="card bg-dark rounded-4 border border-secondary p-4 min-frame-height">
-                            <h5 class="fw-bold mb-4 border-bottom border-secondary pb-2"><i class="bi bi-star text-primary me-2"></i>Ulasan & Penilaian</h5>
-                            <div class="text-center py-5 my-3">
-                                <i class="bi bi-chat-left-heart fs-1 text-secondary mb-3 d-block"></i>
-                                <p class="text-secondary mb-0">Semua barang telah dinilai. Terima kasih atas ulasanmu!</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="voucher" role="tabpanel" aria-labelledby="voucher-tab">
-                        <div class="card bg-dark rounded-4 border border-secondary p-4 min-frame-height">
-                            <h5 class="fw-bold mb-4 border-bottom border-secondary pb-2"><i class="bi bi-ticket-perforated text-primary me-2"></i>Voucher Kamu</h5>
-
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="p-3 border border-success rounded-3 bg-opacity-10 bg-success d-flex align-items-center justify-content-between shadow-sm">
+                    <div class="border-top border-secondary pt-4 mt-3">
+                        <h6 class="fw-bold text-secondary tracking-wide mb-3 small"><i class="bi bi-ticket-perforated me-2 text-success"></i>VOUCHER KHUSUS KAMU</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-3 border border-success border-opacity-25 shadow-sm" style="background: linear-gradient(145deg, #0e1e14, #08100b);">
+                                    <div class="d-flex justify-content-between align-items-center">
                                         <div>
-                                            <span class="badge bg-success mb-2">MEMBER BARU</span>
                                             <h6 class="fw-bold text-white mb-1">Diskon 15% URBAN VIBE</h6>
                                             <small class="text-secondary" style="font-size: 0.75rem;">Tanpa minimum transaksi</small>
                                         </div>
@@ -104,7 +82,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
@@ -115,24 +92,9 @@
 </section>
 
 <style>
-    .min-frame-height {
-        min-height: 380px;
-    }
-    .list-group-custom .list-group-item {
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-    .list-group-custom .list-group-item:hover {
-        background-color: #161616 !important;
-        padding-left: 20px !important;
-    }
-    .list-group-custom .list-group-item.active {
-        background-color: #161616 !important;
-        border-left: 4px solid #0d6efd !important;
-        font-weight: bold;
-    }
-    .list-group-custom .list-group-item.active i {
-        color: #ffffff !important;
-    }
+    .min-frame-height { min-height: 380px; }
+    .list-group-custom .list-group-item { transition: all 0.2s ease; cursor: pointer; }
+    .list-group-custom .list-group-item:hover { background-color: #161616 !important; padding-left: 20px !important; }
+    .list-group-custom .list-group-item.active { background-color: #161616 !important; border-left: 4px solid #0d6efd !important; font-weight: bold; }
 </style>
 @endsection

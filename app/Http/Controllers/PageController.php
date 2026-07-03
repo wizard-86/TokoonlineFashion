@@ -10,16 +10,25 @@ class PageController extends Controller
 {
     public function welcome()
     {
-        // Mengambil produk terbaru untuk halaman awal
+        // Mengambil produk beserta relasi kategorinya untuk halaman depan sebelum login
         $products = Product::with('category')->latest()->take(8)->get();
-        return view('auth.welcome', compact('products'));
+
+        // Mengarahkan ke file resources/views/welcome.blade.php
+        return view('welcome', compact('products'));
     }
 
     public function home()
     {
+        // Mengambil semua produk dan kategori untuk loop etalase utama setelah login
         $products = Product::with('category')->latest()->get();
         $categories = Category::all();
-        return view('auth.home', compact('products', 'categories'));
+
+        // Mengambil produk spesifik untuk variabel manual $c10, $c11, $c12 di home.blade.php
+        $c10 = Product::find(10);
+        $c11 = Product::find(11);
+        $c12 = Product::find(12);
+
+        return view('auth.home', compact('products', 'categories', 'c10', 'c11', 'c12'));
     }
 
     public function collection(Request $request)
@@ -27,40 +36,29 @@ class PageController extends Controller
         $categories = Category::all();
         $query = Product::with('category');
 
-        if ($request->has('category')) {
+        if ($request->has('category') && $request->category != '') {
             $query->where('category_id', $request->category);
         }
 
         $products = $query->get();
-        return view('auth.collection', compact('products', 'categories'));
+
+        // Variabel manual untuk section fallback di dalam collection.blade.php
+        $c10 = Product::find(10);
+        $c11 = Product::find(11);
+        $c12 = Product::find(12);
+
+        return view('auth.collection', compact('products', 'categories', 'c10', 'c11', 'c12'));
     }
 
     public function productDetail(int $id)
     {
-        $product = Product::with('category')->findOrFail($id);
-        // Rekomendasi produk serupa
-        $relatedProducts = Product::where('category_id', $product->category_id)
-            ->where('id', '!=', $id)
-            ->take(4)
-            ->get();
+        // Mengambil produk berdasarkan ID, jika tidak ada langsung memicu halaman 404
+        $product = Product::findOrFail($id);
 
-        return view('auth.product_detail', compact('product', 'relatedProducts'));
-    }
+        // Mengambil data string kategori untuk etalase detail produk
+        $product->category_name = $product->category ? $product->category->name : 'STREETWEAR';
 
-    public function search(Request $request)
-    {
-        $search = $request->input('query');
-        $products = Product::where('name', 'LIKE', "%{$search}%")
-            ->orWhere('description', 'LIKE', "%{$search}%")
-            ->get();
-
-        return view('auth.search', compact('products', 'search'));
-    }
-
-    public function search2(Request $request)
-    {
-        // Alternatif pencarian/filter tingkat lanjut jika digunakan
-        return view('auth.search2');
+        return view('auth.product_detail', compact('product'));
     }
 
     public function about()

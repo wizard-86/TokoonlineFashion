@@ -10,8 +10,8 @@
                     <h1 class="reveal">Elevate Your<br><span class="text-primary">Street Style</span></h1>
                     <p class="reveal">Temukan koleksi eksklusif distro fashion premium yang dirancang untuk ekspresi diri yang tak terbatas.</p>
                     <div class="mt-4 reveal">
-                        <a href="{{ route('login') }}" class="btn btn-premium me-3">Shop Now</a>
-                        <a href="{{ route('login') }}" class="btn btn-outline-premium">View Lookbook</a>
+                        <a href="{{ Route::has('login') ? route('login') : '#' }}" class="btn btn-premium me-3">Shop Now</a>
+                        <a href="{{ Route::has('login') ? route('login') : '#' }}" class="btn btn-outline-premium">View Lookbook</a>
                     </div>
                 </div>
             </div>
@@ -26,77 +26,38 @@
             </div>
 
             <div class="row g-4">
-                <div class="col-md-6 col-lg-3 reveal">
-                    <div class="product-card">
-                        <div class="product-img-container">
-                            <img src="{{ asset('assets/kategori/product1.png') }}" alt="Oversized T-Shirt">
-                        </div>
-                        <div class="product-info">
-                            <span class="product-category">T-SHIRTS</span>
-                            <h5 class="mt-2 text-white">Oversized Black Minimalist</h5>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="fw-bold fs-5 text-primary">Rp 185.000</span>
-                                <a href="{{ route('login') }}" class="btn btn-sm btn-outline-secondary" title="Login untuk membeli">
-                                    <i class="bi bi-lock-fill"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                @if(isset($products) && count($products) > 0)
+                    @foreach($products as $product)
+                        <div class="col-md-6 col-lg-3 reveal">
+                            <div class="product-card">
+                                <div class="product-img-container">
+                                    <img src="{{ asset('assets/' . ($product->image ?? 'default.png')) }}" alt="{{ $product->name }}" class="product-img">
+                                </div>
+                                <div class="product-info">
+                                    <span class="product-category text-uppercase">
+                                        {{ data_get($product, 'category.name', 'STREETWEAR') }}
+                                    </span>
 
-                <div class="col-md-6 col-lg-3 reveal">
-                    <div class="product-card">
-                        <div class="product-img-container">
-                            <img src="{{ asset('assets/kategori/product2.png') }}" alt="Streetwear Hoodie">
-                        </div>
-                        <div class="product-info">
-                            <span class="product-category">HOODIES</span>
-                            <h5 class="mt-2 text-white">Navy Premium Street Hoodie</h5>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="fw-bold fs-5 text-primary">Rp 350.000</span>
-                                <a href="{{ route('login') }}" class="btn btn-sm btn-outline-secondary" title="Login untuk membeli">
-                                    <i class="bi bi-lock-fill"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                    {{-- Mengamankan link detail produk jika rutenya belum terkompilasi --}}
+                                    <a href="{{ Route::has('product.detail') ? route('product.detail', $product->id) : '#' }}" class="text-decoration-none">
+                                        <h5 class="fw-bold my-1 text-white text-truncate product-title-hover">{{ $product->name }}</h5>
+                                    </a>
 
-                <div class="col-md-6 col-lg-3 reveal">
-                    <div class="product-card">
-                         <div class="product-img-container">
-                            <img src="{{ asset('assets/kategori/product3.png') }}" alt="Gothic Yellow Oversized">
-                        </div>
-                        <div class="product-info">
-                            <span class="product-category">T-SHIRT</span>
-                            <h5 class="mt-2 text-white">Gothic Yellow Oversized</h5>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="fw-bold fs-5 text-primary">Rp 189.000</span>
-                                <a href="{{ route('login') }}" class="btn btn-sm btn-outline-secondary" title="Login untuk membeli">
-                                    <i class="bi bi-lock-fill"></i>
-                                </a>
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <span class="fw-bold fs-5 text-primary">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                                        <a href="{{ Route::has('login') ? route('login') : '#' }}" class="btn btn-sm btn-outline-secondary" title="Login untuk membeli">
+                                            <i class="bi bi-lock-fill"></i>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    @endforeach
+                @else
+                    <div class="col-12 text-center py-5">
+                        <p class="text-muted fs-5">Belum ada data produk yang tersedia saat ini.</p>
                     </div>
-                </div>
-
-                <div class="col-md-6 col-lg-3 reveal">
-                    <div class="product-card">
-                        <div class="product-img-container">
-                            <img src="{{ asset('assets/kategori/product4.png') }}" alt="Minimalist Core White">
-                        </div>
-                        <div class="product-info">
-                            <span class="product-category">T-SHIRTS</span>
-                            <h5 class="mt-2 text-white">Minimalist Core White</h5>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="fw-bold fs-5 text-primary">Rp 175.000</span>
-                                <a href="{{ route('login') }}" class="btn btn-sm btn-outline-secondary" title="Login untuk membeli">
-                                    <i class="bi bi-lock-fill"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                @endif
             </div>
         </div>
     </section>
@@ -110,9 +71,14 @@
                 </div>
                 <div class="mt-4 mt-md-0 d-flex gap-2 w-50-md">
                     <input type="email" class="form-control form-control-lg border-0 rounded-pill px-4" placeholder="Email Anda">
-                    <a href="{{ route('login') }}" class="btn btn-dark rounded-pill px-4 fw-bold d-flex align-items-center justify-content-center">SUBSCRIBE</a>
+                    <a href="{{ Route::has('login') ? route('login') : '#' }}" class="btn btn-dark rounded-pill px-4 fw-bold d-flex align-items-center justify-content-center text-decoration-none">SUBSCRIBE</a>
                 </div>
             </div>
         </div>
     </section>
+
+    <style>
+        .product-title-hover { transition: color 0.2s ease; }
+        .product-title-hover:hover { color: #0d6efd !important; }
+    </style>
 @endsection
