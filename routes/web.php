@@ -43,13 +43,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.store');
     Route::get('/checkout/success/{id}', [CheckoutController::class, 'success'])->name('checkout.success');
 
-    // Fitur Profil & Status Transaksi (SUDAH DISINKRONKAN)
-    // Fitur Profil & Status Transaksi
-    Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [ProfileController::class, 'index'])->name('index');
-        Route::get('/dikemas', [ProfileController::class, 'dikemas'])->name('dikemas');
-        Route::get('/dikirim', [ProfileController::class, 'dikirim'])->name('dikirim');
-        Route::get('/dinilai', [ProfileController::class, 'dinilai'])->name('dinilai');
-        Route::get('/voucher', [ProfileController::class, 'voucher'])->name('voucher');
-    });
+    // Fitur Profil - Cukup Satu Route Utama untuk Semua Tab
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
 });
