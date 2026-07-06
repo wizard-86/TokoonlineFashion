@@ -4,51 +4,30 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
     use HasFactory;
 
-    protected $table = 'orders';
-
+    // 🌟 DAFTARKAN SEMUA FIELD INI AGAR IJIN AKSES INSERT TRANSAKSI DIIZINKAN LARAVEL
     protected $fillable = [
-        'user_id',
-        'total_price',
-        'status'
-    ];
+    'user_id',
+    'invoice',
+    'total_harga',
+    'total_price', // Tambahkan ini agar aman dari proteksi Laravel
+    'address',
+    'phone',
+    'courier',
+    'payment_method',
+    'discount_amount',
+    'coins_used',
+    'coins_earned',
+    'status'
+];
 
-    /**
-     * Relasi ke model User
-     */
-    public function user(): BelongsTo
+    // Relasi ke Order Detail jika dibutuhkan oleh view success
+    public function orderDetails()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
-    }
-
-    /**
-     * Relasi ke model OrderDetail
-     */
-    public function orderDetails(): HasMany
-    {
-        return $this->hasMany(OrderDetail::class, 'order_id', 'id');
-    }
-
-    /**
-     * Relasi ke model Payment (Satu order memiliki satu pembayaran)
-     */
-    public function payment(): HasOne
-    {
-        return $this->hasOne(Payment::class, 'order_id', 'id');
-    }
-
-    /**
-     * Relasi ke model Shipping (Satu order memiliki satu pengiriman)
-     */
-    public function shipping(): HasOne
-    {
-        return $this->hasOne(Shipping::class, 'order_id', 'id');
+        return $this->hasMany(OrderDetail::class);
     }
 }

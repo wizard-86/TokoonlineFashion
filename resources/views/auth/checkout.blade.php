@@ -19,6 +19,8 @@
                 <div class="card bg-dark rounded-4 border border-secondary p-4">
                     <h5 class="fw-bold mb-4 border-bottom border-secondary pb-2">Informasi Pengiriman</h5>
 
+
+
                     <form action="{{ route('checkout.store') }}" method="POST">
                         @csrf
 
@@ -32,6 +34,15 @@
                             <input type="text" name="phone" class="form-control bg-dark text-white border-secondary custom-focus" placeholder="Contoh: 08123456789" required value="{{ old('phone') }}">
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small fw-bold">KURIR PENGIRIMAN</label>
+                            <select name="courier" class="form-select bg-dark text-white border-secondary custom-focus">
+                                <option value="J&T Express" selected>J&T Express (Gratis Ongkir)</option>
+                                <option value="JNE Reguler">JNE Reguler (Gratis Ongkir)</option>
+                                <option value="Sicepat">Sicepat (Gratis Ongkir)</option>
+                            </select>
+                        </div>
+
                         <div class="mb-4">
                             <label class="form-label text-secondary small fw-bold">METODE PEMBAYARAN</label>
                             <select name="payment_method" class="form-select bg-dark text-white border-secondary custom-focus" required>
@@ -42,8 +53,17 @@
                             </select>
                         </div>
 
+                        <div class="mb-4 p-3 rounded bg-black bg-opacity-25 border border-secondary">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="toggle_coins_checkbox" {{ $useCoins ? 'checked' : '' }}>
+                                <label class="form-check-label fw-bold small text-info" for="toggle_coins_checkbox">
+                                    <i class="bi bi-coin me-1"></i> GUNAKAN KOIN MEMBER (Miliki: {{ number_format($user->coins, 0, ',', '.') }} Koin)
+                                </label>
+                            </div>
+                        </div>
+
                         <input type="hidden" name="coupon_code" value="{{ $couponCode ?? '' }}">
-                        <input type="hidden" name="use_coins_applied" value="{{ isset($useCoins) && $useCoins ? '1' : '0' }}">
+                        <input type="hidden" name="use_coins_applied" id="use_coins_hidden" value="{{ $useCoins ? '1' : '0' }}">
 
                         <button type="submit" class="btn btn-primary btn-premium w-100 py-3 rounded-3 fw-bold text-uppercase tracking-wide shadow">
                             <i class="bi bi-wallet2 me-2"></i>Buat Pesanan Sekarang
@@ -61,10 +81,10 @@
                         <span>Rp {{ number_format($subtotal ?? 0, 0, ',', '.') }}</span>
                     </div>
 
-                    @if(isset($bundleDiscount) && $bundleDiscount > 0)
+                    @if(isset($categoryDiscount) && $categoryDiscount > 0)
                     <div class="d-flex justify-content-between mb-2 text-warning">
-                        <span>Diskon Paket Bundle</span>
-                        <span>-Rp {{ number_format($bundleDiscount, 0, ',', '.') }}</span>
+                        <span>Diskon Grosir Kategori</span>
+                        <span>-Rp {{ number_format($categoryDiscount, 0, ',', '.') }}</span>
                     </div>
                     @endif
 
@@ -75,10 +95,10 @@
                     </div>
                     @endif
 
-                    @if(isset($coinReductionValue) && $coinReductionValue > 0)
+                    @if(isset($coinsUsed) && $coinsUsed > 0)
                     <div class="d-flex justify-content-between mb-2 text-info">
-                        <span>Potongan Koin Member ({{ $coinsUsed ?? 0 }} Koin)</span>
-                        <span>-Rp {{ number_format($coinReductionValue, 0, ',', '.') }}</span>
+                        <span>Potongan Koin Member</span>
+                        <span>-Rp {{ number_format($coinsUsed, 0, ',', '.') }}</span>
                     </div>
                     @endif
 
@@ -89,13 +109,13 @@
 
                     <div class="pt-2 border-top border-secondary d-flex justify-content-between align-items-center mb-2">
                         <span class="fw-semibold">Total Pembayaran</span>
-                        <h4 class="text-primary fw-bold mb-0">Rp {{ number_format($totalSemua ?? 0, 0, ',', '.') }}</h4>
+                        <h4 class="text-primary fw-bold mb-0">Rp {{ number_format($totalFinalRupiah ?? 0, 0, ',', '.') }}</h4>
                     </div>
 
                     @if(isset($coinsEarned) && $coinsEarned > 0)
                     <div class="mt-3 text-center p-2 rounded bg-black bg-opacity-25 border border-primary border-opacity-25">
                         <small class="text-primary fw-medium">
-                            <i class="bi bi-coin me-1"></i> Kamu akan mendapatkan reward <strong>+{{ $coinsEarned }} Koin</strong> setelah transaksi selesai!
+                            <i class="bi bi-coin me-1"></i> Kamu akan mendapatkan reward <strong>+{{ number_format($coinsEarned, 0, ',', '.') }} Koin</strong> setelah transaksi selesai!
                         </small>
                     </div>
                     @endif
@@ -110,6 +130,26 @@
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkbox = document.getElementById('toggle_coins_checkbox');
+        const hiddenInput = document.getElementById('use_coins_hidden');
+
+        if(checkbox) {
+            checkbox.addEventListener('change', function() {
+                if(this.checked) {
+                    hiddenInput.value = '1';
+                } else {
+                    hiddenInput.value = '0';
+                }
+                const url = new URL(window.location.href);
+                url.searchParams.set('use_coins_applied', hiddenInput.value);
+                window.location.href = url.toString();
+            });
+        }
+    });
+</script>
 
 <style>
     .object-fit-cover { object-fit: cover; }

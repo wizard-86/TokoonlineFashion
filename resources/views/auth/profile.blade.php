@@ -46,7 +46,7 @@
                     <a href="{{ route('profile.index', ['tab' => 'voucher']) }}" class="list-group-item list-group-item-action bg-dark text-white border-0 p-3 {{ $tab == 'voucher' ? 'active-profile' : '' }}">
                         <div class="d-flex justify-content-between align-items-center">
                             <div><i class="bi bi-ticket-perforated text-primary me-3 fs-5"></i>Diskon & Voucher</div>
-                            <span class="badge bg-success text-white px-2.5 py-1 rounded-2" style="font-size: 0.75rem;">Diskon 15%</span>
+                            <span class="badge bg-success text-white px-2.5 py-1 rounded-2" style="font-size: 0.75rem;">Info</span>
                         </div>
                     </a>
                 </div>
@@ -115,25 +115,37 @@
                         @endif
 
                     @elseif($tab == 'voucher')
-                        <h5 class="fw-bold mb-4 border-bottom border-secondary pb-2"><i class="bi bi-ticket-perforated text-primary me-2"></i>Voucher Kamu</h5>
+                        <h5 class="fw-bold mb-4 border-bottom border-secondary pb-2">
+                            <i class="bi bi-ticket-perforated text-primary me-2"></i>Voucher Kamu <span class="fs-6 text-secondary fw-normal">({{ $totalCompleted }} Pesanan Selesai)</span>
+                        </h5>
                         <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="p-3 border border-success rounded-3 bg-opacity-10 bg-success d-flex align-items-center justify-content-between shadow-sm">
-                                    <div>
-                                        <span class="badge bg-success mb-2">MEMBER BARU</span>
-                                        <h6 class="fw-bold text-white mb-1">Diskon 15% URBAN VIBE</h6>
-                                        <small class="text-secondary" style="font-size: 0.75rem;">Tanpa minimum transaksi</small>
-                                    </div>
-                                    <div class="text-end ps-3 border-start border-success border-opacity-25">
-                                        <span class="fw-bold text-success fs-5">15%</span>
-                                        <span class="d-block text-secondary mt-1" style="font-size: 0.65rem;">KODE: URBAN15</span>
+                            @forelse($availableVouchers as $voucher)
+                                <div class="col-md-6">
+                                    <div class="p-3 border {{ $voucher['class'] }} rounded-3 bg-black bg-opacity-50 d-flex align-items-between justify-content-between shadow-sm {{ $voucher['is_locked'] ? 'opacity-50' : '' }}">
+                                        <div>
+                                            <span class="badge {{ str_replace('border', 'bg', $voucher['class']) }} mb-2 text-dark fw-bold">{{ $voucher['title'] }}</span>
+                                            <h6 class="fw-bold text-white mb-1">{{ $voucher['desc'] }}</h6>
+                                            @if($voucher['is_locked'])
+                                                <small class="text-warning" style="font-size: 0.75rem;"><i class="bi bi-lock-fill me-1"></i>{{ $voucher['requirement'] }}</small>
+                                            @else
+                                                <small class="text-success" style="font-size: 0.75rem;"><i class="bi bi-check-circle-fill me-1"></i>Siap Digunakan</small>
+                                            @endif
+                                        </div>
+                                        <div class="text-end ps-3 border-start border-secondary border-opacity-25 my-auto">
+                                            <span class="fw-bold text-white fs-5 d-block">{{ $voucher['percent'] }}</span>
+                                            @if(!$voucher['is_locked'])
+                                                <span class="badge bg-primary mt-1" style="font-size: 0.65rem;">{{ $voucher['code'] }}</span>
+                                            @else
+                                                <span class="text-secondary d-block mt-1" style="font-size: 0.65rem;">Locked</span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            @empty
+                                <div class="text-center w-100 text-secondary py-4">Belum ada voucher yang tersedia.</div>
+                            @endforelse
                         </div>
-                    @endif
-
-                </div>
+                    @endif </div>
             </div>
         </div>
     </div>
