@@ -6,9 +6,9 @@
     <section class="py-5 my-5" style="background-color: #0b0b0b;">
         <div class="container pt-5 text-white">
 
-            <div class="mb-4">
+            <div class="mb-5">
                 <h2 class="fw-bold text-white tracking-wide">OUR <span class="text-primary">COLLECTION</span></h2>
-                <p class="text-secondary small">Menampilkan produk streetwear terbaik khusus untuk kamu</p>
+                <p class="text-secondary small">Menampilkan 8 produk streetwear terlaris pilihan terbaik</p>
             </div>
 
             @if(session('success'))
@@ -18,22 +18,9 @@
                 </div>
             @endif
 
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="d-flex gap-2 flex-wrap">
-                        <a href="{{ route('collection') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 {{ !request('category') ? 'active bg-primary border-primary text-white' : '' }}">All Items</a>
-                        @foreach($categories as $category)
-                            <a href="{{ route('collection', ['category' => $category->id]) }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 {{ request('category') == $category->id ? 'active bg-primary border-primary text-white' : '' }}">
-                                {{ $category->name }}
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-
             <div class="row g-4">
                 @foreach($products as $product)
-                    <div class="col-md-6 col-lg-3">
+                    <div class="col-6 col-md-4 col-lg-3">
                         <div class="product-card">
                             <div class="product-img-container">
                                 <img src="{{ asset('assets/' . ($product->image ?? 'default.png')) }}" alt="{{ $product->name }}" class="product-img">

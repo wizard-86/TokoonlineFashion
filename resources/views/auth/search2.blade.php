@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'URBAN VIBE | Premium Collection')
+@section('title', 'URBAN VIBE | Search Product')
 
 @section('content')
     <section class="py-5 my-5" style="background-color: #0b0b0b;">
         <div class="container pt-5 text-white">
 
             <div class="mb-4">
-                <h2 class="fw-bold text-white tracking-wide">OUR <span class="text-primary">COLLECTION</span></h2>
-                <p class="text-secondary small">Menampilkan produk streetwear terbaik khusus untuk kamu</p>
+                <h2 class="fw-bold text-white tracking-wide">SEARCH <span class="text-primary">PRODUCT</span></h2>
+                <p class="text-secondary small">Ketik nama produk distro dan pilih kotak kategori favoritmu</p>
             </div>
 
             <div class="row mb-5">
@@ -30,13 +30,13 @@
                             <button class="btn btn-sm btn-category" onclick="filterCategory('{{ $category->id }}', this)">{{ $category->name }}</button>
                         @endforeach
                     </div>
-                    <p id="categoryDescription" class="text-muted small mt-3 italic mb-0">Menampilkan semua item koleksi pakaian.</p>
+                    <p id="categoryDescription" class="text-secondary small mt-3 italic text-muted">Menampilkan semua item koleksi pakaian.</p>
                 </div>
             </div>
 
-            <div class="row g-4" id="productGrid">
+            <div class="row g-4" id="productsGrid">
                 @foreach($products as $product)
-                    <div class="col-md-6 col-lg-3 product-card-wrapper" data-category="{{ $product->category_id }}">
+                    <div class="col-6 col-md-4 col-lg-3 product-card-wrapper" data-category="{{ $product->category_id }}">
                         <div class="product-card">
                             <div class="product-img-container">
                                 <img src="{{ asset('assets/' . ($product->image ?? 'default.png')) }}" alt="{{ $product->name }}" class="product-img">
@@ -44,7 +44,7 @@
                             <div class="product-info">
                                 <span class="product-category text-uppercase">{{ $product->category->name ?? 'STREETWEAR' }}</span>
                                 <a href="{{ route('product.detail', $product->id) }}" class="text-decoration-none">
-                                    <h5 class="fw-bold my-1 text-white text-truncate">{{ $product->name }}</h5>
+                                    <h5 class="fw-bold my-1 text-white product-title-hover text-truncate">{{ $product->name }}</h5>
                                 </a>
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <span class="fw-bold fs-5 text-primary">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
@@ -58,8 +58,36 @@
                     </div>
                 @endforeach
             </div>
+
         </div>
     </section>
+
+    <style>
+        .btn-category {
+            background-color: #1a1a1a;
+            color: #b3b3b3;
+            border: 1px solid #333;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .btn-category:hover {
+            border-color: #0d6efd;
+            color: #fff;
+        }
+        .active-category {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: #fff !important;
+        }
+        .focus-primary:focus {
+            background-color: #1a1a1a !important;
+            border-color: #0d6efd !important;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            color: #fff;
+        }
+    </style>
 
     <script>
         function filterCategory(categoryId, button) {

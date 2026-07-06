@@ -8,47 +8,37 @@ use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        return view('auth.profile', compact('user'));
-    }
 
-    public function dikemas()
-    {
-        // Mengambil pesanan yang berstatus pending / sedang dikemas
-        $orders = Order::with(['orderDetails.product', 'payment', 'shipping'])
-            ->where('user_id', Auth::id())
-            ->where('status', 'pending')
-            ->latest()
-            ->get();
+        // Mengambil parameter ?tab=... dari URL, default-nya adalah 'dikemas'
+        $tab = $request->query('tab', 'dikemas');
 
-        return view('profile.dikemas', compact('orders'));
-    }
+        // Ambil data pesanan milik user yang sedang login
+        $query = Order::with(['orderDetails.product'])->where('user_id', Auth::id());
 
-    public function dikirim()
-    {
-        // Mengambil pesanan yang sedang dalam proses kurir pengiriman
-        $orders = Order::with(['orderDetails.product', 'shipping'])
-            ->where('user_id', Auth::id())
-            ->whereHas('shipping', function($query) {
-                $query->where('status', 'shipping');
-            })
-            ->latest()
-            ->get();
+        // Filter data berdasarkan tab aktif
+        if ($tab == 'dikemas') {
+            $orders = $query->where('status', 'pending')->latest()->get();
+        } elseif ($tab == 'dikirim') {
+            $orders = $query->whereIn('status', ['shipping', 'dikirim'])->latest()->get();
+        } elseif ($tab == 'dinilai') {
+            $orders = $query->whereIn('status', ['completed', 'success', 'selesai'])->latest()->get();
+        } else {
+            $orders = collect(); // Kosong untuk tab voucher
+        }
 
-        return view('profile.dikirim', compact('orders'));
-    }
+        // Hitung jumlah badge secara dinamis untuk ditaruh di sidebar
+        $counts = [
+            'dikemas' => Order::where('user_id', Auth::id())->where('status', 'pending')->count(),
+            'dikirim' => Order::where('user_id', Auth::id())->whereIn('status', ['shipping', 'dikirim'])->count(),
+            'dinilai' => Order::where('user_id', Auth::id())->whereIn('status', ['completed', 'success', 'selesai'])->count(),
+        ];
 
-    public function dinilai()
-    {
-        // Mengambil riwayat pesanan selesai yang siap diberikan ulasan
-        $orders = Order::with(['orderDetails.product'])
-            ->where('user_id', Auth::id())
-            ->where('status', 'completed')
-            ->latest()
-            ->get();
+        // Deteksi lokasi file view utama profilmu (bisa di 'profile' atau 'auth.profile')
+        $viewPath = view()->exists('auth.profile') ? 'auth.profile' : 'profile';
 
-        return view('profile.dinilai', compact('orders'));
+        return view($viewPath, compact('user', 'tab', 'orders', 'counts'));
     }
 }

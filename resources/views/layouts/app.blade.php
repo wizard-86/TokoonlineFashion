@@ -22,64 +22,60 @@
         .tracking-wide {
             letter-spacing: 1.5px;
         }
+        .nav-icon {
+            color: rgba(255, 255, 255, 0.75);
+            transition: color 0.2s ease;
+        }
+        .nav-icon:hover {
+            color: #0d6efd;
+        }
+        .nav-icon.active-icon {
+            color: #0d6efd !important;
+        }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top py-3">
         <div class="container">
-            <a class="navbar-brand fw-bold tracking-wide fs-4 text-white" href="{{ Auth::check() ? route('home') : route('landing') }}">
+            <a class="navbar-brand fw-bold tracking-wide fs-4 text-white" href="{{ Auth::check() ? route('home') : route('welcome') }}">
                 URBAN<span class="text-primary">VIBE</span>
             </a>
-
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-2">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1 gap-lg-4 text-uppercase fw-semibold" style="font-size: 0.9rem; letter-spacing: 0.5px;">
                     @auth
                         <li class="nav-item">
-                            <a class="nav-link text-white {{ request()->routeIs('home') ? 'active fw-bold text-primary' : '' }}" href="{{ route('home') }}">Home</a>
+                            <a class="nav-link {{ request()->routeIs('home') ? 'active text-primary' : 'text-white-50' }}" href="{{ route('home') }}">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white {{ request()->routeIs('collection') ? 'active fw-bold text-primary' : '' }}" href="{{ route('collection') }}">Collection</a>
+                            <a class="nav-link {{ request()->routeIs('collection') ? 'active text-primary' : 'text-white-50' }}" href="{{ route('collection') }}">Collection</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white {{ request()->routeIs('about') ? 'active fw-bold text-primary' : '' }}" href="{{ route('about') }}">About</a>
+                            <a class="nav-link {{ request()->routeIs('about') ? 'active text-primary' : 'text-white-50' }}" href="{{ route('about') }}">About Us</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white {{ request()->routeIs('contact') ? 'active fw-bold text-primary' : '' }}" href="{{ route('contact') }}">Contact</a>
+                            <a class="nav-link {{ request()->routeIs('contact') ? 'active text-primary' : 'text-white-50' }}" href="{{ route('contact') }}">Contact</a>
                         </li>
                     @endauth
-
-                    @guest
-                        <li class="nav-item">
-                            <a class="nav-link text-white active fw-bold text-primary" href="{{ route('landing') }}">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white-50" href="{{ route('login') }}" onclick="alert('Harap masuk ke akun kamu terlebih dahulu untuk melihat koleksi penuh kami.');">Collection</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white-50" href="{{ route('login') }}" onclick="alert('Harap masuk ke akun kamu terlebih dahulu untuk mengakses menu ini.');">About</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white-50" href="{{ route('login') }}" onclick="alert('Harap masuk ke akun kamu terlebih dahulu untuk menghubungi kami.');">Contact</a>
-                        </li>
-                    @endguest
                 </ul>
 
                 <div class="d-flex align-items-center gap-4">
                     @auth
-                        <a href="{{ route('search') }}" class="text-white text-decoration-none {{ request()->routeIs('search') ? 'text-primary' : '' }}">
+                        <!-- IKON SEARCH: Diarahkan ke route search asli yang memanggil search2.blade.php -->
+                        <a href="{{ route('search') }}" class="text-decoration-none nav-icon {{ request()->routeIs('search') ? 'active-icon' : '' }}" title="Cari Produk">
                             <i class="bi bi-search fs-5"></i>
                         </a>
 
-                        <a href="{{ route('cart.index') }}" class="text-white text-decoration-none position-relative {{ request()->routeIs('cart.index') ? 'text-primary' : '' }}">
+                        <!-- IKON KERANJANG: Membuka halaman Cart -->
+                        <a href="{{ route('cart.index') }}" class="text-decoration-none nav-icon position-relative {{ request()->routeIs('cart.index') ? 'active-icon' : '' }}" title="Keranjang Belanja">
                             <i class="bi bi-cart3 fs-5"></i>
                         </a>
 
-                        <a href="{{ route('profile.index') }}" class="text-decoration-none {{ request()->routeIs('profile.*') ? 'text-primary' : 'text-white' }}" title="Profil Saya">
+                        <!-- IKON PROFILE: Membuka manajemen Profile dashboard user -->
+                        <a href="{{ route('profile.index') }}" class="text-decoration-none nav-icon {{ request()->routeIs('profile.*') ? 'active-icon' : '' }}" title="Profil Saya">
                             <i class="bi bi-person-fill fs-4"></i>
                         </a>
                     @endauth

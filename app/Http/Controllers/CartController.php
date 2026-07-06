@@ -12,15 +12,39 @@ class CartController extends Controller
 {
     public function index()
     {
+        // 1. Ambil data keranjang utama milik user yang login beserta relasi produknya
         $cart = Cart::with('cartDetails.product')
             ->where('user_id', Auth::id())
             ->first();
 
-        return view('auth.cart', compact('cart'));
+        // 2. Pecah isi detailnya ke variabel $cartDetails agar dibaca oleh View
+        $cartDetails = $cart ? $cart->cartDetails : collect();
+
+        // 3. FIX ERROR: Hitung total semua harga barang di dalam keranjang
+        $totalSemua = 0;
+        foreach ($cartDetails as $detail) {
+            if ($detail->product) {
+                $totalSemua += $detail->product->price * $detail->quantity;
+            }
+        }
+
+        // 4. Kirim variabel $cart, $cartDetails, dan $totalSemua ke file view
+        return view('auth.cart', compact('cart', 'cartDetails', 'totalSemua'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $product_id = null)
     {
+        // Ambil product_id dari parameter URL (tombol +), jika tidak ada baru dari request body
+        $productId = $product_id ?? $request->product_id;
+
+        // Ambil kuantitas dari form, jika lewat tombol "+" langsung otomatis beri nilai 1
+        $quantity = $request->input('quantity', 1);
+
+        $request->merge([
+            'product_id' => $productId,
+            'quantity' => $quantity
+        ]);
+
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1'
@@ -29,18 +53,18 @@ class CartController extends Controller
         $cart = Cart::firstOrCreate(['user_id' => Auth::id()]);
 
         $cartDetail = CartDetail::where('cart_id', $cart->id)
-            ->where('product_id', $request->product_id)
+            ->where('product_id', $productId)
             ->first();
 
         if ($cartDetail) {
             $cartDetail->update([
-                'quantity' => $cartDetail->quantity + $request->quantity
+                'quantity' => $cartDetail->quantity + $quantity
             ]);
         } else {
             CartDetail::create([
                 'cart_id' => $cart->id,
-                'product_id' => $request->product_id,
-                'quantity' => $request->quantity
+                'product_id' => $productId,
+                'quantity' => $quantity
             ]);
         }
 

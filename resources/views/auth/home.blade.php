@@ -24,28 +24,32 @@
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show border-0 text-white rounded-3 mb-4" style="background-color: #198754;" role="alert">
                     <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss=\"alert\" aria-label="Close"></button>
                 </div>
             @endif
 
             <div class="section-title mb-5 reveal">
-                <h2 class="fw-bold text-white">Featured <span class="text-primary">Collection</span></h2>
-                <p class="text-secondary">Pilihan item streetwear terbaik untuk menunjang penampilan harianmu.</p>
+                <h2 class="fw-bold text-white">New <span class="text-primary">Arrivals</span></h2>
+                <p class="text-secondary">Koleksi terbaru minggu ini khusus untuk kamu</p>
             </div>
 
-            <div class="row g-4">
-                @foreach($products->take(4) as $product)
-                    <div class="col-md-6 col-lg-3 reveal">
-                        <div class="product-card">
-                            <div class="product-img-container">
-                                <img src="{{ asset('assets/' . ($product->image ?? 'default.png')) }}" alt="{{ $product->name }}" class="product-img">
+            <div class="row g-4 mb-5">
+                @foreach($products as $product)
+                    <div class="col-md-3">
+                        <div class="product-card border border-secondary p-3 rounded-4 bg-dark h-100 d-flex flex-column justify-content-between position-relative reveal">
+                            <div class="product-img-container rounded-3 overflow-hidden mb-3">
+                                <img src="{{ asset('assets/' . ($product->image ?? 'default.png')) }}" alt="{{ $product->name }}" class="img-fluid product-img w-100 object-fit-cover" style="height: 280px;">
                             </div>
-                            <div class="product-info">
-                                <span class="product-category text-uppercase">{{ $product->category->name ?? 'STREETWEAR' }}</span>
-                                <a href="{{ route('product.detail', $product->id) }}" class="text-decoration-none">
-                                    <h5 class="fw-bold my-1 text-white product-title-hover text-truncate">{{ $product->name }}</h5>
-                                </a>
-                                <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="product-info flex-grow-1 d-flex flex-column justify-content-between">
+                                <div>
+                                    <span class="text-primary fw-bold tracking-wide text-uppercase small" style="font-size: 0.75rem;">
+                                        {{ $product->category->name ?? 'STREETWEAR' }}
+                                    </span>
+                                    <h5 class="fw-bold my-1 text-white text-truncate product-title-hover" title="{{ $product->name }}">
+                                        {{ $product->name }}
+                                    </h5>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
                                     <span class="fw-bold fs-5 text-primary">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
                                     <form action="{{ route('cart.add', $product->id) }}" method="POST" class="m-0">
                                         @csrf
@@ -56,82 +60,6 @@
                         </div>
                     </div>
                 @endforeach
-
-                <div class="col-md-6 col-lg-3 reveal">
-                    <div class="product-card">
-                        <div class="product-img-container">
-                            <img src="{{ asset('assets/image_70c8a6.png') }}" alt="Heavyweight Hoodie" class="product-img">
-                        </div>
-                        <div class="product-info">
-                            <span class="product-category">HOODIE</span>
-                            <a href="{{ route('product.detail', 10) }}" class="text-decoration-none">
-                                <h5 class="fw-bold my-1 text-white product-title-hover">Heavyweight Hoodie Black</h5>
-                            </a>
-                            @if($c10)
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <span class="fw-bold fs-5 text-primary">Rp {{ number_format($c10->price, 0, ',', '.') }}</span>
-                                    <form action="{{ route('cart.add', $c10->id) }}" method="POST" class="m-0">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-premium"><i class="bi bi-plus-lg"></i></button>
-                                    </form>
-                                </div>
-                            @else
-                                <div class="p-2 border border-secondary rounded text-muted text-center small mt-2">Item Belum Ada di DB</div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-lg-3 reveal">
-                    <div class="product-card">
-                        <div class="product-img-container">
-                            <img src="{{ asset('assets/image_6bb185.png') }}" alt="Cargo Pants" class="product-img">
-                        </div>
-                        <div class="product-info">
-                            <span class="product-category">PANTS</span>
-                            <a href="{{ route('product.detail', 11) }}" class="text-decoration-none">
-                                <h5 class="fw-bold my-1 text-white product-title-hover">Cyber Cargo Pants V2</h5>
-                            </a>
-                            @if($c11)
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <span class="fw-bold fs-5 text-primary">Rp {{ number_format($c11->price, 0, ',', '.') }}</span>
-                                    <form action="{{ route('cart.add', $c11->id) }}" method="POST" class="m-0">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-premium"><i class="bi bi-plus-lg"></i></button>
-                                    </form>
-                                </div>
-                            @else
-                                <div class="p-2 border border-secondary rounded text-muted text-center small mt-2">Item Belum Ada di DB</div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-lg-3 reveal">
-                    <div class="product-card">
-                        <div class="product-img-container">
-                            <img src="{{ asset('assets/image_037d45.png') }}" alt="Minimalist Core Tee" class="product-img">
-                        </div>
-                        <div class="product-info">
-                            <span class="product-category">T-SHIRT</span>
-                            <a href="{{ route('product.detail', 12) }}" class="text-decoration-none">
-                                <h5 class="fw-bold my-1 text-white product-title-hover">Minimalist Core Oversized</h5>
-                            </a>
-                            @if($c12)
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <span class="fw-bold fs-5 text-primary">Rp {{ number_format($c12->price, 0, ',', '.') }}</span>
-                                    <form action="{{ route('cart.add', $c12->id) }}" method="POST" class="m-0">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-premium"><i class="bi bi-plus-lg"></i></button>
-                                    </form>
-                                </div>
-                            @else
-                                <div class="p-2 border border-secondary rounded text-muted text-center small mt-2">Item Belum Ada di DB</div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
     </section>

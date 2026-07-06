@@ -44,4 +44,11 @@ class Product extends Model
     {
         return $this->hasMany(OrderDetail::class, 'product_id', 'id');
     }
+
+    // Relasi Many-to-Many ke paket Bundle
+    public function bundles()
+    {
+        return $this->belongsToMany(Bundle::class, 'bundle_product');
+    }
+
 }

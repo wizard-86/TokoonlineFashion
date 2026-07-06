@@ -10,20 +10,16 @@ class PageController extends Controller
 {
     public function welcome()
     {
-        // Mengambil produk beserta relasi kategorinya untuk halaman depan sebelum login
         $products = Product::with('category')->latest()->take(8)->get();
-
-        // Mengarahkan ke file resources/views/welcome.blade.php
-        return view('welcome', compact('products'));
+        return view('auth.welcome', compact('products'));
     }
 
     public function home()
     {
-        // Mengambil semua produk dan kategori untuk loop etalase utama setelah login
-        $products = Product::with('category')->latest()->get();
-        $categories = Category::all();
+        // HOME: Hanya memanggil 4 produk TERBARU (kategori bebas)
+        $products = Product::with('category')->latest()->take(4)->get();
 
-        // Mengambil produk spesifik untuk variabel manual $c10, $c11, $c12 di home.blade.php
+        $categories = Category::all();
         $c10 = Product::find(10);
         $c11 = Product::find(11);
         $c12 = Product::find(12);
@@ -31,18 +27,12 @@ class PageController extends Controller
         return view('auth.home', compact('products', 'categories', 'c10', 'c11', 'c12'));
     }
 
-    public function collection(Request $request)
+    public function collection()
     {
+        // COLLECTION: Hanya memanggil 8 produk TERLARIS/bebas secara global
+        $products = Product::with('category')->latest()->take(8)->get();
+
         $categories = Category::all();
-        $query = Product::with('category');
-
-        if ($request->has('category') && $request->category != '') {
-            $query->where('category_id', $request->category);
-        }
-
-        $products = $query->get();
-
-        // Variabel manual untuk section fallback di dalam collection.blade.php
         $c10 = Product::find(10);
         $c11 = Product::find(11);
         $c12 = Product::find(12);
@@ -50,12 +40,25 @@ class PageController extends Controller
         return view('auth.collection', compact('products', 'categories', 'c10', 'c11', 'c12'));
     }
 
+    public function search(Request $request)
+    {
+        $categories = Category::all();
+        $query = Product::with('category');
+
+        // Logika pencarian jika user mengetik sesuatu di search2
+        if ($request->has('q') && $request->q != '') {
+            $query->where('name', 'like', '%' . $request->q . '%');
+        }
+
+        $products = $query->get();
+
+        // Memastikan mengarah ke file resources/views/auth/search2.blade.php
+        return view('auth.search2', compact('products', 'categories'));
+    }
+
     public function productDetail(int $id)
     {
-        // Mengambil produk berdasarkan ID, jika tidak ada langsung memicu halaman 404
         $product = Product::findOrFail($id);
-
-        // Mengambil data string kategori untuk etalase detail produk
         $product->category_name = $product->category ? $product->category->name : 'STREETWEAR';
 
         return view('auth.product_detail', compact('product'));

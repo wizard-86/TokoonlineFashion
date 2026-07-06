@@ -10,8 +10,8 @@
                     <h1 class="reveal">Elevate Your<br><span class="text-primary">Street Style</span></h1>
                     <p class="reveal">Temukan koleksi eksklusif distro fashion premium yang dirancang untuk ekspresi diri yang tak terbatas.</p>
                     <div class="mt-4 reveal">
-                        <a href="{{ Route::has('login') ? route('login') : '#' }}" class="btn btn-premium me-3">Shop Now</a>
-                        <a href="{{ Route::has('login') ? route('login') : '#' }}" class="btn btn-outline-premium">View Lookbook</a>
+                        <a href="{{ route('login') }}" class="btn btn-premium me-3">Shop Now</a>
+                        <a href="{{ route('login') }}" class="btn btn-outline-premium">View Lookbook</a>
                     </div>
                 </div>
             </div>
@@ -28,24 +28,23 @@
             <div class="row g-4">
                 @if(isset($products) && count($products) > 0)
                     @foreach($products as $product)
-                        <div class="col-md-6 col-lg-3 reveal">
-                            <div class="product-card">
-                                <div class="product-img-container">
-                                    <img src="{{ asset('assets/' . ($product->image ?? 'default.png')) }}" alt="{{ $product->name }}" class="product-img">
+                        <div class="col-md-3">
+                            <div class="product-card border border-secondary p-3 rounded-4 bg-dark h-100 d-flex flex-column justify-content-between position-relative reveal">
+                                <div class="product-img-container rounded-3 overflow-hidden mb-3">
+                                    <img src="{{ asset('assets/' . ($product->image ?? 'default.png')) }}" alt="{{ $product->name }}" class="img-fluid product-img w-100 object-fit-cover" style="height: 280px;">
                                 </div>
-                                <div class="product-info">
-                                    <span class="product-category text-uppercase">
-                                        {{ data_get($product, 'category.name', 'STREETWEAR') }}
-                                    </span>
-
-                                    {{-- Mengamankan link detail produk jika rutenya belum terkompilasi --}}
-                                    <a href="{{ Route::has('product.detail') ? route('product.detail', $product->id) : '#' }}" class="text-decoration-none">
-                                        <h5 class="fw-bold my-1 text-white text-truncate product-title-hover">{{ $product->name }}</h5>
-                                    </a>
-
-                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="product-info flex-grow-1 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <span class="text-primary fw-bold tracking-wide text-uppercase small" style="font-size: 0.75rem;">
+                                            {{ $product->category->name ?? 'STREETWEAR' }}
+                                        </span>
+                                        <h5 class="fw-bold my-1 text-white text-truncate product-title-hover" title="{{ $product->name }}">
+                                            {{ $product->name }}
+                                        </h5>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
                                         <span class="fw-bold fs-5 text-primary">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                                        <a href="{{ Route::has('login') ? route('login') : '#' }}" class="btn btn-sm btn-outline-secondary" title="Login untuk membeli">
+                                        <a href="{{ route('login') }}" class="btn btn-sm btn-outline-primary rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" title="Login untuk membeli">
                                             <i class="bi bi-lock-fill"></i>
                                         </a>
                                     </div>
@@ -71,7 +70,7 @@
                 </div>
                 <div class="mt-4 mt-md-0 d-flex gap-2 w-50-md">
                     <input type="email" class="form-control form-control-lg border-0 rounded-pill px-4" placeholder="Email Anda">
-                    <a href="{{ Route::has('login') ? route('login') : '#' }}" class="btn btn-dark rounded-pill px-4 fw-bold d-flex align-items-center justify-content-center text-decoration-none">SUBSCRIBE</a>
+                    <a href="{{ route('login') }}" class="btn btn-dark rounded-pill px-4 fw-bold d-flex align-items-center justify-content-center text-decoration-none">SUBSCRIBE</a>
                 </div>
             </div>
         </div>

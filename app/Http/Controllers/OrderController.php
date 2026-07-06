@@ -15,7 +15,9 @@ class OrderController extends Controller
             ->where('user_id', Auth::id())
             ->findOrFail($id);
 
-        return view('order.payment', compact('order'));
+        // Diubah dari 'order.payment' menjadi 'auth.profile' karena form bayar kamu menyatu di frame profil
+        // Atau jika kamu punya file auth/payment.blade.php ganti menjadi 'auth.payment'
+        return view('auth.profile', compact('order'));
     }
 
     public function confirmPayment(Request $request, int $id)
