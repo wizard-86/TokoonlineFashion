@@ -6,6 +6,14 @@
     <section class="py-5 my-5" style="background-color: #0b0b0b;">
         <div class="container pt-5 text-white">
 
+            <!-- Notifikasi berhasil ditambahkan ke keranjang -->
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show border-0 mb-4" role="alert" style="background-color: #198754; color: white;">
+                    <i class="bi bi-check-circle me-2"></i> {{ session('success') }}
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
             <div class="mb-4">
                 <h2 class="fw-bold text-white tracking-wide">SEARCH <span class="text-primary">PRODUCT</span></h2>
                 <p class="text-secondary small">Ketik nama produk distro dan pilih kotak kategori favoritmu</p>
@@ -38,9 +46,10 @@
                 @foreach($products as $product)
                     <div class="col-6 col-md-4 col-lg-3 product-card-wrapper" data-category="{{ $product->category_id }}">
                         <div class="product-card">
-                            <div class="product-img-container">
+                            <!-- REVISI: Wadah gambar sekarang bisa diklik menuju detail produk -->
+                            <a href="{{ route('product.detail', $product->id) }}" class="d-block product-img-container">
                                 <img src="{{ asset('assets/' . ($product->image ?? 'default.png')) }}" alt="{{ $product->name }}" class="product-img">
-                            </div>
+                            </a>
                             <div class="product-info">
                                 <span class="product-category text-uppercase">{{ $product->category->name ?? 'STREETWEAR' }}</span>
                                 <a href="{{ route('product.detail', $product->id) }}" class="text-decoration-none">
@@ -63,68 +72,30 @@
     </section>
 
     <style>
-        .btn-category {
-            background-color: #1a1a1a;
-            color: #b3b3b3;
-            border: 1px solid #333;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        .btn-category:hover {
-            border-color: #0d6efd;
-            color: #fff;
-        }
-        .active-category {
-            background-color: #0d6efd !important;
-            border-color: #0d6efd !important;
-            color: #fff !important;
-        }
-        .focus-primary:focus {
-            background-color: #1a1a1a !important;
-            border-color: #0d6efd !important;
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-            color: #fff;
-        }
+        .btn-category { background-color: #1a1a1a; color: #b3b3b3; border: 1px solid #333; padding: 10px 20px; border-radius: 8px; font-weight: 500; transition: all 0.2s ease; }
+        .btn-category:hover { border-color: #0d6efd; color: #fff; }
+        .active-category { background-color: #0d6efd !important; border-color: #0d6efd !important; color: #fff !important; }
+        .focus-primary:focus { background-color: #1a1a1a !important; border-color: #0d6efd !important; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); color: #fff; }
     </style>
 
     <script>
         function filterCategory(categoryId, button) {
             document.querySelectorAll('.btn-category').forEach(btn => btn.classList.remove('active-category'));
             button.classList.add('active-category');
-
             const products = document.querySelectorAll('.product-card-wrapper');
             const descElement = document.getElementById('categoryDescription');
-
-            if (categoryId === 'all') {
-                descElement.innerText = "Menampilkan semua item koleksi pakaian.";
-            } else {
-                const categoryName = button.innerText;
-                descElement.innerText = `Menampilkan produk khusus dalam kategori ${categoryName}`;
-            }
-
+            descElement.innerText = categoryId === 'all' ? "Menampilkan semua item koleksi pakaian." : `Menampilkan produk khusus dalam kategori ${button.innerText}`;
             products.forEach(product => {
                 const productCategory = product.getAttribute('data-category');
-                if (categoryId === 'all' || String(productCategory) === String(categoryId)) {
-                    product.classList.remove('d-none');
-                } else {
-                    product.classList.add('d-none');
-                }
+                product.classList.toggle('d-none', !(categoryId === 'all' || String(productCategory) === String(categoryId)));
             });
         }
 
         document.getElementById('searchInput').addEventListener('input', function() {
             const searchValue = this.value.toLowerCase();
-            const products = document.querySelectorAll('.product-card-wrapper');
-
-            products.forEach(product => {
+            document.querySelectorAll('.product-card-wrapper').forEach(product => {
                 const productName = product.querySelector('h5').innerText.toLowerCase();
-                if (productName.includes(searchValue)) {
-                    product.classList.remove('d-none');
-                } else {
-                    product.classList.add('d-none');
-                }
+                product.classList.toggle('d-none', !productName.includes(searchValue));
             });
         });
     </script>

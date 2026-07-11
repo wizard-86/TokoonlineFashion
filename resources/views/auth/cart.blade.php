@@ -10,7 +10,7 @@
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show border-0 text-white rounded-3 mb-4" style="background-color: #198754;" role="alert">
                 <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
@@ -29,6 +29,7 @@
                             <thead>
                                 <tr class="text-secondary border-bottom border-secondary small tracking-wide">
                                     <th scope="col" class="pb-3">PRODUK</th>
+                                    <th scope="col" class="pb-3 text-center">UKURAN</th> <!-- TAMBAHAN HEADER -->
                                     <th scope="col" class="pb-3 text-center">JUMLAH</th>
                                     <th scope="col" class="pb-3 text-end">TOTAL</th>
                                     <th scope="col" class="pb-3 text-center">AKSI</th>
@@ -46,21 +47,37 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        <!-- TAMBAHAN DATA UKURAN -->
                                         <td class="py-3 text-center">
-                                            <form action="{{ route('cart.update', $detail->id) }}" method="POST" class="d-flex align-items-center justify-content-center gap-2 m-0">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="number" name="quantity" value="{{ $detail->quantity }}" min="1" class="form-control bg-dark border-secondary text-white text-center rounded-3 p-1" style="width: 60px; height: 35px;">
-                                                <button type="submit" class="btn btn-sm btn-outline-secondary px-2 py-1" style="height: 35px;"><i class="bi bi-arrow-clockwise"></i></button>
-                                            </form>
+                                            <span class="badge bg-black border border-secondary text-white px-3 py-2 fw-bold" style="font-size: 0.85rem;">
+                                                {{ $detail->size ?? 'XL' }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3 text-center">
+                                            <div class="d-flex align-items-center justify-content-center gap-2 m-0">
+                                                <!-- Tombol Kurang -->
+                                                <form action="{{ route('cart.update', $detail->id) }}" method="POST">
+                                                    @csrf @method('PUT')
+                                                    <input type="hidden" name="quantity" value="{{ $detail->quantity - 1 }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary" {{ $detail->quantity <= 1 ? 'disabled' : '' }}>-</button>
+                                                </form>
+
+                                                <span class="fw-bold px-2" style="min-width: 30px;">{{ $detail->quantity }}</span>
+
+                                                <!-- Tombol Tambah -->
+                                                <form action="{{ route('cart.update', $detail->id) }}" method="POST">
+                                                    @csrf @method('PUT')
+                                                    <input type="hidden" name="quantity" value="{{ $detail->quantity + 1 }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
+                                                </form>
+                                            </div>
                                         </td>
                                         <td class="py-3 text-end fw-semibold text-white">
                                             Rp {{ number_format(($detail->product->price ?? 0) * $detail->quantity, 0, ',', '.') }}
                                         </td>
                                         <td class="py-3 text-center">
                                             <form action="{{ route('cart.destroy', $detail->id) }}" method="POST" class="m-0">
-                                                @csrf
-                                                @method('DELETE')
+                                                @csrf @method('DELETE')
                                                 <button type="submit" class="btn text-secondary hover-white bg-transparent border-0"><i class="bi bi-trash3 fs-5"></i></button>
                                             </form>
                                         </td>

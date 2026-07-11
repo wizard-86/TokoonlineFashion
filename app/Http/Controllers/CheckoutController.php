@@ -24,7 +24,7 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Keranjang belanja Anda kosong!');
         }
 
-        // 1. Hitung Subtotal Harga Produk Asli
+        // 1. Hitung Subtotal Harga Produk dan Total Item
         $subtotal = 0;
         $totalItems = 0;
         $categoryCounts = [];
@@ -42,79 +42,81 @@ class CheckoutController extends Controller
             }
         }
 
-        // 2. LOGIKA DISKON GROSIR KATEGORI BARU
+        $couponCode = $request->input('coupon_code', '');
+
+        // 2. LOGIKA DISKON GROSIR KATEGORI
         $categoryDiscount = 0;
         $discountPercentage = 0;
         $jumlahKategoriUnik = count($categoryCounts);
 
         if ($totalItems >= 4 && $jumlahKategoriUnik >= 4) {
-            $discountPercentage = 0.20; // 4 barang kategori berbeda = 20%
+            $discountPercentage = 0.20;
         } else {
             foreach ($categoryCounts as $count) {
                 if ($count >= 2) {
-                    $discountPercentage = 0.05; // 2 barang kategori sama = 5%
+                    $discountPercentage = 0.05;
                     break;
                 }
             }
         }
         $categoryDiscount = $subtotal * $discountPercentage;
 
-        // 3. LOGIKA DISKON VOUCHER KUPON
+        // 3. LOGIKA DISKON VOUCHER KUPON (Disesuaikan dengan Voucher Baru)
         $voucherDiscount = 0;
-        $couponCode = $request->input('coupon_code', '');
         if ($request->filled('coupon_code')) {
-            $coupon = Coupon::where('code', $couponCode)
-                            ->where('status', 'active')
-                            ->where('min_order', '<=', $subtotal)
-                            ->first();
-            if ($coupon) {
-                if ($coupon->type == 'percentage') {
-                    $voucherDiscount = $subtotal * ($coupon->value / 100);
-                } else {
-                    $voucherDiscount = $coupon->value;
+            if ($couponCode == 'GOLD15') {
+                if ($totalItems < 4) {
+                    return redirect()->route('checkout.index')->with('error', 'Minimal 4 barang untuk Voucher Gold!');
+                }
+                $voucherDiscount = $subtotal * 0.15; // Diskon 15%
+            } elseif ($couponCode == 'SILVER10') {
+                if ($totalItems < 2) {
+                    return redirect()->route('checkout.index')->with('error', 'Minimal 2 barang untuk Voucher Silver!');
+                }
+                $voucherDiscount = $subtotal * 0.10; // Diskon 10%
+            } elseif ($couponCode == 'WELCOME5') {
+                $voucherDiscount = $subtotal * 0.05; // Diskon 5%
+            } else {
+                // Pengecekan database untuk voucher kustom lainnya jika ada
+                $coupon = Coupon::where('code', $couponCode)
+                                ->where('status', 'active')
+                                ->where('min_order', '<=', $subtotal)
+                                ->first();
+                if ($coupon) {
+                    $voucherDiscount = ($coupon->type == 'percentage') ? $subtotal * ($coupon->value / 100) : $coupon->value;
                 }
             }
         }
 
-        // Gabungkan seluruh diskon sistem
         $totalDiskonSistem = $categoryDiscount + $voucherDiscount;
 
-        // 4. HITUNG KOIN (1 Koin = Rp 1)
+        // 4. HITUNG KOIN
         $coinsUsed = 0;
         $useCoins = false;
         if ($request->input('use_coins_applied') == '1') {
             $useCoins = true;
-            $coinsUsed = $user->coins; // Menggunakan seluruh koin yang dimiliki
+            $coinsUsed = $user->coins;
         }
 
-        // Perhitungan Akhir Rupiah
-        $totalFinalRupiah = $subtotal - $totalDiskonSistem - $coinsUsed;
-        if ($totalFinalRupiah < 0) {
-            $totalFinalRupiah = 0;
-        }
-
-        // Kelipatan Rp 10.000 dapat reward 1 koin
+        $totalFinalRupiah = max(0, $subtotal - $totalDiskonSistem - $coinsUsed);
         $coinsEarned = floor($totalFinalRupiah / 10000);
 
-        // Cari view yang valid (di folder auth atau bukan)
+        // Siapkan daftar voucher yang valid untuk ditampilkan di dropdown checkout
+        $vouchersForSelect = [
+            ['code' => 'WELCOME5', 'label' => 'WELCOME5 (Diskon 5% - Pengguna Baru)', 'available' => true],
+            ['code' => 'SILVER10', 'label' => 'SILVER10 (Diskon 10% - Min 2 Barang)', 'available' => $totalItems >= 2],
+            ['code' => 'GOLD15', 'label' => 'GOLD15 (Diskon 15% - Min 4 Barang)', 'available' => $totalItems >= 4],
+        ];
+
         $viewPath = view()->exists('auth.checkout') ? 'auth.checkout' : 'checkout';
 
         return view($viewPath, compact(
-            'cartDetails',
-            'subtotal',
-            'categoryDiscount',
-            'voucherDiscount',
-            'totalDiskonSistem',
-            'coinsUsed',
-            'useCoins',
-            'totalFinalRupiah',
-            'coinsEarned',
-            'user',
-            'couponCode'
+            'cartDetails', 'subtotal', 'categoryDiscount', 'voucherDiscount',
+            'totalDiskonSistem', 'coinsUsed', 'useCoins', 'totalFinalRupiah',
+            'coinsEarned', 'user', 'couponCode', 'vouchersForSelect', 'totalItems'
         ));
     }
 
-    // 🌟 MENGGUNAKAN METHOD PROCESS AGAR MATCH DENGAN ROUTING KAMU
     public function process(Request $request)
     {
         $request->validate([
@@ -130,21 +132,28 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Keranjang kosong!');
         }
 
+        $totalItems = $cart->cartDetails->sum('quantity');
+
+        // Validasi Keamanan Sebelum Transaksi
+        if ($request->filled('coupon_code')) {
+            if ($request->coupon_code == 'GOLD15' && $totalItems < 4) {
+                return redirect()->back()->with('error', 'Minimal 4 barang untuk Voucher Gold!')->withInput();
+            }
+            if ($request->coupon_code == 'SILVER10' && $totalItems < 2) {
+                return redirect()->back()->with('error', 'Minimal 2 barang untuk Voucher Silver!')->withInput();
+            }
+        }
+
         DB::beginTransaction();
         try {
             $subtotal = 0;
-            $totalItems = 0;
             $categoryCounts = [];
 
             foreach ($cart->cartDetails as $detail) {
                 if ($detail->product) {
                     $subtotal += $detail->product->price * $detail->quantity;
-                    $totalItems += $detail->quantity;
-
                     $categoryId = $detail->product->category_id ?? 'default';
-                    if (!isset($categoryCounts[$categoryId])) {
-                        $categoryCounts[$categoryId] = 0;
-                    }
+                    if (!isset($categoryCounts[$categoryId])) $categoryCounts[$categoryId] = 0;
                     $categoryCounts[$categoryId] += $detail->quantity;
                 }
             }
@@ -155,44 +164,32 @@ class CheckoutController extends Controller
                 $discountPercentage = 0.20;
             } else {
                 foreach ($categoryCounts as $count) {
-                    if ($count >= 2) {
-                        $discountPercentage = 0.05;
-                        break;
-                    }
+                    if ($count >= 2) { $discountPercentage = 0.05; break; }
                 }
             }
             $categoryDiscount = $subtotal * $discountPercentage;
 
             $voucherDiscount = 0;
             if ($request->filled('coupon_code')) {
-                $coupon = Coupon::where('code', $request->coupon_code)
-                                ->where('status', 'active')
-                                ->where('min_order', '<=', $subtotal)
-                                ->first();
-                if ($coupon) {
-                    if ($coupon->type == 'percentage') {
-                        $voucherDiscount = $subtotal * ($coupon->value / 100);
-                    } else {
-                        $voucherDiscount = $coupon->value;
+                if ($request->coupon_code == 'GOLD15') {
+                    $voucherDiscount = $subtotal * 0.15;
+                } elseif ($request->coupon_code == 'SILVER10') {
+                    $voucherDiscount = $subtotal * 0.10;
+                } elseif ($request->coupon_code == 'WELCOME5') {
+                    $voucherDiscount = $subtotal * 0.05;
+                } else {
+                    $coupon = Coupon::where('code', $request->coupon_code)->where('status', 'active')->first();
+                    if ($coupon) {
+                        $voucherDiscount = ($coupon->type == 'percentage') ? $subtotal * ($coupon->value / 100) : $coupon->value;
                     }
                 }
             }
 
             $totalDiskonSistem = $categoryDiscount + $voucherDiscount;
-
-            $coinsUsed = 0;
-            if ($request->input('use_coins_applied') == '1') {
-                $coinsUsed = $user->coins;
-            }
-
-            $totalFinalRupiah = $subtotal - $totalDiskonSistem - $coinsUsed;
-            if ($totalFinalRupiah < 0) {
-                $totalFinalRupiah = 0;
-            }
-
+            $coinsUsed = ($request->input('use_coins_applied') == '1') ? $user->coins : 0;
+            $totalFinalRupiah = max(0, $subtotal - $totalDiskonSistem - $coinsUsed);
             $coinsEarned = floor($totalFinalRupiah / 10000);
 
-            // Simpan Data ke database orders (mengisi total_harga dan total_price agar aman)
             $order = Order::create([
                 'user_id' => $user->id,
                 'invoice' => 'UV-' . strtoupper(Str::random(10)),
@@ -218,7 +215,7 @@ class CheckoutController extends Controller
             }
 
             $userModel = User::find($user->id);
-            $userModel->coins = ($userModel->coins - $coinsUsed) + $coinsEarned;
+            $userModel->coins = max(0, ($userModel->coins - $coinsUsed) + $coinsEarned);
             $userModel->save();
 
             $cart->cartDetails()->delete();
@@ -235,15 +232,7 @@ class CheckoutController extends Controller
     public function success($id)
     {
         $order = Order::with('orderDetails.product')->findOrFail($id);
-
-        if ($order->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        if (view()->exists('auth.success')) {
-            return view('auth.success', compact('order'));
-        }
-
-        return view('success', compact('order'));
+        if ($order->user_id !== Auth::id()) abort(403);
+        return view(view()->exists('auth.success') ? 'auth.success' : 'success', compact('order'));
     }
 }

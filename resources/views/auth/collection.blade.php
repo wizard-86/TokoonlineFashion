@@ -22,9 +22,10 @@
                 @foreach($products as $product)
                     <div class="col-6 col-md-4 col-lg-3">
                         <div class="product-card">
-                            <div class="product-img-container">
+                            <!-- MODIFIKASI: Gambar dibungkus link detail -->
+                            <a href="{{ route('product.detail', $product->id) }}" class="d-block product-img-container">
                                 <img src="{{ asset('assets/' . ($product->image ?? 'default.png')) }}" alt="{{ $product->name }}" class="product-img">
-                            </div>
+                            </a>
                             <div class="product-info">
                                 <span class="product-category text-uppercase">{{ $product->category->name ?? 'STREETWEAR' }}</span>
                                 <a href="{{ route('product.detail', $product->id) }}" class="text-decoration-none">

@@ -6,7 +6,28 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
+
+// === ADMIN ROUTES (Diproteksi dengan auth standar) ===
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // Manajemen Produk
+    Route::get('/products', [AdminController::class, 'products'])->name('products.index');
+    Route::get('/products/create', [AdminController::class, 'create'])->name('products.create');
+    Route::post('/products/store', [AdminController::class, 'storeProduct'])->name('products.store');
+    Route::get('/products/{id}/edit', [AdminController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{id}/update', [AdminController::class, 'updateProduct'])->name('products.update');
+    Route::post('/products/{id}/update-stock', [AdminController::class, 'updateStock'])->name('products.updateStock');
+    Route::delete('/products/{id}/delete', [AdminController::class, 'destroyProduct'])->name('products.destroy');
+
+    // Manajemen Pesanan
+    Route::get('/orders', [AdminController::class, 'orders'])->name('orders.index');
+    Route::get('/orders/{id}', [AdminController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{id}/print', [AdminController::class, 'print'])->name('orders.print'); // Berhasil Ditambahkan
+    Route::post('/orders/{id}/update-status', [AdminController::class, 'updateOrderStatus'])->name('orders.updateStatus');
+});
 
 // === PUBLIC ROUTES ===
 Route::get('/', [PageController::class, 'welcome'])->name('welcome');
@@ -40,9 +61,9 @@ Route::middleware('auth')->group(function () {
 
     // Fitur Checkout & Pembayaran Berhasil
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.store');
+    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
     Route::get('/checkout/success/{id}', [CheckoutController::class, 'success'])->name('checkout.success');
 
-    // Fitur Profil - Cukup Satu Route Utama untuk Semua Tab
+    // Fitur Profil
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
 });

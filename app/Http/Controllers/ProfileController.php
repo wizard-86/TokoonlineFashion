@@ -18,25 +18,25 @@ class ProfileController extends Controller
             ->whereIn('status', ['completed', 'success', 'selesai'])
             ->count();
 
-        // 2. Semua voucher didefinisikan di sini agar selalu muncul di profil
+        // 2. Definisi voucher baru sesuai permintaan
         $availableVouchers = [
             [
                 'title' => 'GOLD MEMBER',
-                'desc' => 'Diskon 25% Semua Produk',
-                'code' => 'GOLD25',
-                'percent' => '25%',
+                'desc' => 'Diskon 15% minimal 4 barang',
+                'code' => 'GOLD15',
+                'percent' => '15%',
                 'class' => 'border-warning',
-                'is_locked' => $totalCompleted < 10,
-                'requirement' => 'Minimal 10 pesanan selesai'
+                'is_locked' => $totalCompleted < 4,
+                'requirement' => 'Minimal 4 barang di checkout'
             ],
             [
                 'title' => 'SILVER MEMBER',
-                'desc' => 'Diskon 10% Semua Produk',
+                'desc' => 'Diskon 10% minimal 2 barang',
                 'code' => 'SILVER10',
                 'percent' => '10%',
                 'class' => 'border-danger',
-                'is_locked' => $totalCompleted < 5,
-                'requirement' => 'Minimal 5 pesanan selesai'
+                'is_locked' => $totalCompleted < 2,
+                'requirement' => 'Minimal 2 barang di checkout'
             ],
             [
                 'title' => 'MEMBER BARU',
@@ -45,15 +45,15 @@ class ProfileController extends Controller
                 'percent' => '5%',
                 'class' => 'border-success',
                 'is_locked' => false,
-                'requirement' => 'Tanpa minimal pesanan'
+                'requirement' => 'Bebas kategori'
             ],
         ];
 
-        // 3. Logika Tab Pesanan
+        // 3. Logika Tab Pesanan (Mendukung status pending dan processing)
         $query = Order::with(['orderDetails.product'])->where('user_id', Auth::id());
 
         if ($tab == 'dikemas') {
-            $orders = $query->where('status', 'pending')->latest()->get();
+            $orders = $query->whereIn('status', ['pending', 'processing'])->latest()->get();
         } elseif ($tab == 'dikirim') {
             $orders = $query->whereIn('status', ['shipping', 'dikirim'])->latest()->get();
         } elseif ($tab == 'dinilai') {
@@ -64,7 +64,7 @@ class ProfileController extends Controller
 
         // 4. Hitung jumlah order untuk badge info di sidebar
         $counts = [
-            'dikemas' => Order::where('user_id', Auth::id())->where('status', 'pending')->count(),
+            'dikemas' => Order::where('user_id', Auth::id())->whereIn('status', ['pending', 'processing'])->count(),
             'dikirim' => Order::where('user_id', Auth::id())->whereIn('status', ['shipping', 'dikirim'])->count(),
             'dinilai' => Order::where('user_id', Auth::id())->whereIn('status', ['completed', 'success', 'selesai'])->count(),
         ];

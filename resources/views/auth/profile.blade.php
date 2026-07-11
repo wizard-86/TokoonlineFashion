@@ -67,14 +67,22 @@
                                 <div class="p-3 bg-black rounded-3 border border-secondary mb-3">
                                     <div class="d-flex justify-content-between border-bottom border-secondary pb-2 mb-2 small text-secondary">
                                         <span>Invoice: <strong class="text-white">{{ $order->invoice }}</strong></span>
-                                        <span class="badge bg-warning text-dark text-uppercase">{{ $order->status }}</span>
+                                        <span class="badge bg-warning text-dark text-uppercase">
+                                            {{ $order->status == 'processing' ? 'Diproses / Dikemas' : $order->status }}
+                                        </span>
                                     </div>
-                                    @foreach($order->orderDetails as $detail)
-                                        <div class="d-flex align-items-center gap-3 py-2">
-                                            <div class="text-white fw-bold small">{{ $detail->product->name ?? 'Produk' }}</div>
-                                            <div class="text-secondary small">{{ $detail->quantity }}x</div>
-                                        </div>
-                                    @endforeach
+                                    @if($order->orderDetails)
+                                        @foreach($order->orderDetails as $detail)
+                                            <div class="d-flex align-items-center justify-content-between py-2 border-bottom border-secondary border-opacity-25">
+                                                <!-- PERBAIKAN: Menampilkan Nama Produk diikuti ukuran, misal: Urban Vibe Shirt (XL) -->
+                                                <div class="text-white fw-bold small">
+                                                    {{ $detail->product->name ?? 'Produk Bawaan' }}
+                                                    <span class="text-primary ms-1">({{ $detail->size ?? 'XL' }})</span>
+                                                </div>
+                                                <div class="text-secondary small">{{ $detail->quantity }}x</div>
+                                            </div>
+                                        @endforeach
+                                    @endif
                                 </div>
                             @endforeach
                         @endif
@@ -93,7 +101,7 @@
                                         <span>Invoice: <strong class="text-white">{{ $order->invoice }}</strong></span>
                                         <span class="badge bg-info text-dark text-uppercase">Dalam Pengiriman</span>
                                     </div>
-                                    <p class="small text-secondary mb-0">Kurir: {{ $order->courier }}</p>
+                                    <p class="small text-secondary mb-0">Kurir: {{ $order->courier ?? 'Ekspedisi Urban Vibe' }}</p>
                                 </div>
                             @endforeach
                         @endif

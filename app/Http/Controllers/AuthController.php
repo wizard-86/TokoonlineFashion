@@ -15,21 +15,28 @@ class AuthController extends Controller
     }
 
     public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
+{
+    $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
 
-        if (Auth::attempt($credentials, $request->remember)) {
-            $request->session()->regenerate();
-            return redirect()->intended(route('home'));
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
+
+        // Cek jika yang login adalah email admin khusus
+        if ($request->email === 'vikyurbanvibe@gmail.com') {
+            return redirect()->route('admin.dashboard')->with('success', 'Selamat datang Admin Urban Vibe!');
         }
 
-        return redirect()->back()->withErrors([
-            'email' => 'Email atau kata sandi yang Anda masukkan salah.',
-        ])->withInput();
+        // Jika email lain (termasuk viky@gmail.com), arahkan ke halaman utama member
+        return redirect()->route('home');
     }
+
+    return back()->withErrors([
+        'email' => 'Email atau password yang Anda masukkan salah.',
+    ])->withInput();
+}
 
     public function showRegister()
     {

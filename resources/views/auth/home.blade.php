@@ -24,7 +24,7 @@
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show border-0 text-white rounded-3 mb-4" style="background-color: #198754;" role="alert">
                     <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss=\"alert\" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
 
@@ -37,17 +37,20 @@
                 @foreach($products as $product)
                     <div class="col-md-3">
                         <div class="product-card border border-secondary p-3 rounded-4 bg-dark h-100 d-flex flex-column justify-content-between position-relative reveal">
-                            <div class="product-img-container rounded-3 overflow-hidden mb-3">
+                            <!-- MODIFIKASI: Gambar dibungkus link detail -->
+                            <a href="{{ route('product.detail', $product->id) }}" class="product-img-container rounded-3 overflow-hidden mb-3 d-block">
                                 <img src="{{ asset('assets/' . ($product->image ?? 'default.png')) }}" alt="{{ $product->name }}" class="img-fluid product-img w-100 object-fit-cover" style="height: 280px;">
-                            </div>
+                            </a>
                             <div class="product-info flex-grow-1 d-flex flex-column justify-content-between">
                                 <div>
                                     <span class="text-primary fw-bold tracking-wide text-uppercase small" style="font-size: 0.75rem;">
                                         {{ $product->category->name ?? 'STREETWEAR' }}
                                     </span>
-                                    <h5 class="fw-bold my-1 text-white text-truncate product-title-hover" title="{{ $product->name }}">
-                                        {{ $product->name }}
-                                    </h5>
+                                    <a href="{{ route('product.detail', $product->id) }}" class="text-decoration-none">
+                                        <h5 class="fw-bold my-1 text-white text-truncate product-title-hover" title="{{ $product->name }}">
+                                            {{ $product->name }}
+                                        </h5>
+                                    </a>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
                                     <span class="fw-bold fs-5 text-primary">Rp {{ number_format($product->price, 0, ',', '.') }}</span>

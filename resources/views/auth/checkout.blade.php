@@ -15,31 +15,28 @@
         @endif
 
         <div class="row g-4">
+            <!-- Kolom Kiri: Informasi -->
             <div class="col-lg-7">
                 <div class="card bg-dark rounded-4 border border-secondary p-4">
                     <h5 class="fw-bold mb-4 border-bottom border-secondary pb-2">Informasi Pengiriman</h5>
 
-
-
-                    <form action="{{ route('checkout.store') }}" method="POST">
+                    <form action="{{ route('checkout.process') }}" method="POST">
                         @csrf
-
                         <div class="mb-3">
                             <label class="form-label text-secondary small fw-bold">ALAMAT LENGKAP PENGIRIMAN</label>
-                            <textarea name="address" class="form-control bg-dark text-white border-secondary custom-focus" rows="3" placeholder="Masukkan alamat lengkap pengiriman..." required>{{ old('address') }}</textarea>
+                            <textarea name="address" class="form-control bg-dark text-white border-secondary custom-focus" rows="3" required>{{ old('address') }}</textarea>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label text-secondary small fw-bold">NOMOR TELEPON</label>
-                            <input type="text" name="phone" class="form-control bg-dark text-white border-secondary custom-focus" placeholder="Contoh: 08123456789" required value="{{ old('phone') }}">
+                            <input type="text" name="phone" class="form-control bg-dark text-white border-secondary custom-focus" required value="{{ old('phone') }}">
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label text-secondary small fw-bold">KURIR PENGIRIMAN</label>
                             <select name="courier" class="form-select bg-dark text-white border-secondary custom-focus">
-                                <option value="J&T Express" selected>J&T Express (Gratis Ongkir)</option>
+                                <option value="J&T Express">J&T Express (Gratis Ongkir)</option>
                                 <option value="JNE Reguler">JNE Reguler (Gratis Ongkir)</option>
-                                <option value="Sicepat">Sicepat (Gratis Ongkir)</option>
                             </select>
                         </div>
 
@@ -47,120 +44,112 @@
                             <label class="form-label text-secondary small fw-bold">METODE PEMBAYARAN</label>
                             <select name="payment_method" class="form-select bg-dark text-white border-secondary custom-focus" required>
                                 <option value="" disabled selected>Pilih Metode Pembayaran</option>
-                                <option value="Transfer Bank">Transfer Bank (Otomatis)</option>
-                                <option value="E-Wallet">E-Wallet (Dana/OVO/Gopay)</option>
-                                <option value="COD">Bayar di Tempat (COD)</option>
+                                <option value="Transfer Bank">Transfer Bank</option>
+                                <option value="E-Wallet">E-Wallet</option>
                             </select>
                         </div>
 
-                        <div class="mb-4 p-3 rounded bg-black bg-opacity-25 border border-secondary">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="toggle_coins_checkbox" {{ $useCoins ? 'checked' : '' }}>
-                                <label class="form-check-label fw-bold small text-info" for="toggle_coins_checkbox">
-                                    <i class="bi bi-coin me-1"></i> GUNAKAN KOIN MEMBER (Miliki: {{ number_format($user->coins, 0, ',', '.') }} Koin)
-                                </label>
+                        <!-- Fitur Voucher Menggunakan Dropdown Pilihan -->
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small fw-bold">KODE VOUCHER</label>
+                            <div class="input-group">
+                                <select name="coupon_code" id="couponSelect" class="form-select bg-dark text-white border-secondary custom-focus" onchange="applyCoupon()">
+                                    <option value="">Pilih Voucher Berdasarkan Keranjang Anda</option>
+                                    @foreach($vouchersForSelect as $v)
+                                        <option value="{{ $v['code'] }}"
+                                                {{ $couponCode == $v['code'] ? 'selected' : '' }}
+                                                {{ !$v['available'] ? 'disabled' : '' }}>
+                                            {{ $v['label'] }} {{ !$v['available'] ? '(Syarat Belum Terpenuhi)' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <span class="input-group-text bg-primary border-primary text-white">
+                                    <i class="bi bi-ticket-perforated"></i>
+                                </span>
                             </div>
                         </div>
 
-                        <input type="hidden" name="coupon_code" value="{{ $couponCode ?? '' }}">
-                        <input type="hidden" name="use_coins_applied" id="use_coins_hidden" value="{{ $useCoins ? '1' : '0' }}">
+                        <!-- Gunakan Koin -->
+                        <div class="mb-4 p-3 rounded bg-black bg-opacity-25 border border-secondary">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="toggle_coins_checkbox" {{ ($useCoins ?? false) ? 'checked' : '' }}>
+                                <label class="form-check-label fw-bold small text-info" for="toggle_coins_checkbox">
+                                    <i class="bi bi-coin me-1"></i> GUNAKAN KOIN MEMBER (Miliki: {{ number_format($user->coins ?? 0, 0, ',', '.') }} Koin)
+                                </label>
+                            </div>
+                        </div>
+                        <input type="hidden" name="use_coins_applied" id="use_coins_hidden" value="{{ ($useCoins ?? false) ? '1' : '0' }}">
 
-                        <button type="submit" class="btn btn-primary btn-premium w-100 py-3 rounded-3 fw-bold text-uppercase tracking-wide shadow">
+                        <button type="submit" class="btn btn-primary btn-premium w-100 py-3 rounded-3 fw-bold text-uppercase shadow">
                             <i class="bi bi-wallet2 me-2"></i>Buat Pesanan Sekarang
                         </button>
                     </form>
                 </div>
             </div>
 
+            <!-- Kolom Kanan: Ringkasan -->
             <div class="col-lg-5">
                 <div class="card bg-dark rounded-4 border border-secondary p-4 text-white">
                     <h5 class="fw-bold mb-3 border-bottom border-secondary pb-2">Ringkasan Belanja</h5>
-
                     <div class="d-flex justify-content-between mb-2">
-                        <span class="text-secondary">Subtotal Produk</span>
+                        <span class="text-secondary">Subtotal</span>
                         <span>Rp {{ number_format($subtotal ?? 0, 0, ',', '.') }}</span>
                     </div>
-
-                    @if(isset($categoryDiscount) && $categoryDiscount > 0)
-                    <div class="d-flex justify-content-between mb-2 text-warning">
-                        <span>Diskon Grosir Kategori</span>
-                        <span>-Rp {{ number_format($categoryDiscount, 0, ',', '.') }}</span>
-                    </div>
+                    @if(($categoryDiscount ?? 0) > 0)
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span>Diskon Grosir Kategori</span>
+                            <span>-Rp {{ number_format($categoryDiscount, 0, ',', '.') }}</span>
+                        </div>
                     @endif
-
-                    @if(isset($voucherDiscount) && $voucherDiscount > 0)
-                    <div class="d-flex justify-content-between mb-2 text-success">
-                        <span>Voucher Potongan</span>
-                        <span>-Rp {{ number_format($voucherDiscount, 0, ',', '.') }}</span>
-                    </div>
+                    @if(($voucherDiscount ?? 0) > 0)
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span>Diskon Voucher ({{ $couponCode }})</span>
+                            <span>-Rp {{ number_format($voucherDiscount, 0, ',', '.') }}</span>
+                        </div>
                     @endif
-
-                    @if(isset($coinsUsed) && $coinsUsed > 0)
-                    <div class="d-flex justify-content-between mb-2 text-info">
-                        <span>Potongan Koin Member</span>
-                        <span>-Rp {{ number_format($coinsUsed, 0, ',', '.') }}</span>
-                    </div>
+                    @if(($coinsUsed ?? 0) > 0)
+                        <div class="d-flex justify-content-between mb-2 text-info">
+                            <span>Koin Digunakan</span>
+                            <span>-Rp {{ number_format($coinsUsed, 0, ',', '.') }}</span>
+                        </div>
                     @endif
-
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-secondary">Biaya Pengiriman</span>
-                        <span class="text-success fw-medium">GRATIS ONGKIR</span>
-                    </div>
-
-                    <div class="pt-2 border-top border-secondary d-flex justify-content-between align-items-center mb-2">
+                    <div class="pt-2 border-top border-secondary d-flex justify-content-between align-items-center">
                         <span class="fw-semibold">Total Pembayaran</span>
                         <h4 class="text-primary fw-bold mb-0">Rp {{ number_format($totalFinalRupiah ?? 0, 0, ',', '.') }}</h4>
                     </div>
-
-                    @if(isset($coinsEarned) && $coinsEarned > 0)
-                    <div class="mt-3 text-center p-2 rounded bg-black bg-opacity-25 border border-primary border-opacity-25">
-                        <small class="text-primary fw-medium">
-                            <i class="bi bi-coin me-1"></i> Kamu akan mendapatkan reward <strong>+{{ number_format($coinsEarned, 0, ',', '.') }} Koin</strong> setelah transaksi selesai!
-                        </small>
-                    </div>
-                    @endif
-                </div>
-
-                <div class="mt-4 text-start">
-                    <a href="{{ route('cart.index') }}" class="text-secondary text-decoration-none small fw-medium hover-white">
-                        <i class="bi bi-arrow-left me-2"></i>Kembali ke Keranjang
-                    </a>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const checkbox = document.getElementById('toggle_coins_checkbox');
-        const hiddenInput = document.getElementById('use_coins_hidden');
+<style>
+    .custom-focus:focus { background-color: #1a1a1a !important; color: #fff !important; border-color: #0d6efd !important; }
+    .form-select { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important; }
+    .btn-premium { background-color: #0d6efd; border: 1px solid #0d6efd; color: #fff; }
+</style>
 
-        if(checkbox) {
-            checkbox.addEventListener('change', function() {
-                if(this.checked) {
-                    hiddenInput.value = '1';
-                } else {
-                    hiddenInput.value = '0';
-                }
-                const url = new URL(window.location.href);
-                url.searchParams.set('use_coins_applied', hiddenInput.value);
-                window.location.href = url.toString();
-            });
+<script>
+    function applyCoupon() {
+        const code = document.getElementById('couponSelect').value;
+        const url = new URL(window.location.href);
+        if (code) {
+            url.searchParams.set('coupon_code', code);
+        } else {
+            url.searchParams.delete('coupon_code');
         }
+        window.location.href = url.toString();
+    }
+
+    document.getElementById('toggle_coins_checkbox').addEventListener('change', function() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('use_coins_applied', this.checked ? '1' : '0');
+        // Tetap pertahankan voucher yang sedang aktif saat koin di-toggle
+        const currentCoupon = document.getElementById('couponSelect').value;
+        if (currentCoupon) {
+            url.searchParams.set('coupon_code', currentCoupon);
+        }
+        window.location.href = url.toString();
     });
 </script>
-
-<style>
-    .object-fit-cover { object-fit: cover; }
-    .custom-focus:focus {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        color: #fff !important;
-        border-color: #0d6efd !important;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
-    }
-    .hover-white:hover { color: #ffffff !important; transition: color 0.2s; }
-    .btn-premium { background-color: #0d6efd; border: 1px solid #0d6efd; color: #fff; transition: all 0.2s; }
-    .btn-premium:hover { background-color: #0b5ed7; border-color: #0a58ca; }
-</style>
 @endsection
