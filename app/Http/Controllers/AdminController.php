@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
@@ -30,6 +32,97 @@ class AdminController extends Controller
 
         $products = Product::with('category')->get();
         return view('admin.products', compact('products'));
+    }
+
+    // 2a. Tampilan Manajemen Voucher
+    public function vouchers()
+    {
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak! Anda bukan admin.');
+
+        $vouchers = Coupon::with('creator')->latest()->get();
+        return view('admin.vouchers', compact('vouchers'));
+    }
+
+    public function createVoucher()
+    {
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak! Anda bukan admin.');
+
+        return view('admin.create_voucher');
+    }
+
+    public function storeVoucher(Request $request)
+    {
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak! Anda bukan admin.');
+
+        $request->validate([
+            'code' => ['required', 'string', 'max:50', 'unique:coupons,code'],
+            'type' => ['required', 'in:percentage,nominal'],
+            'value' => ['required', 'numeric', 'min:0'],
+            'min_order' => ['required', 'numeric', 'min:0'],
+            'quota' => ['required', 'integer', 'min:0'],
+            'status' => ['required', 'in:active,inactive'],
+            'expires_at' => ['nullable', 'date'],
+        ]);
+
+        Coupon::create([
+            'code' => strtoupper($request->code),
+            'type' => $request->type,
+            'value' => $request->value,
+            'min_order' => $request->min_order,
+            'quota' => $request->quota,
+            'status' => $request->status,
+            'expires_at' => $request->expires_at,
+            'created_by' => Auth::id(),
+        ]);
+
+        return redirect()->route('admin.vouchers.index')->with('success', 'Voucher berhasil dibuat!');
+    }
+
+    public function editVoucher($id)
+    {
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak! Anda bukan admin.');
+
+        $voucher = Coupon::findOrFail($id);
+        return view('admin.edit_voucher', compact('voucher'));
+    }
+
+    public function updateVoucher(Request $request, $id)
+    {
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak! Anda bukan admin.');
+
+        $voucher = Coupon::findOrFail($id);
+
+        $request->validate([
+            'code' => ['required', 'string', 'max:50', Rule::unique('coupons', 'code')->ignore($voucher->id)],
+            'type' => ['required', 'in:percentage,nominal'],
+            'value' => ['required', 'numeric', 'min:0'],
+            'min_order' => ['required', 'numeric', 'min:0'],
+            'quota' => ['required', 'integer', 'min:0'],
+            'status' => ['required', 'in:active,inactive'],
+            'expires_at' => ['nullable', 'date'],
+        ]);
+
+        $voucher->update([
+            'code' => strtoupper($request->code),
+            'type' => $request->type,
+            'value' => $request->value,
+            'min_order' => $request->min_order,
+            'quota' => $request->quota,
+            'status' => $request->status,
+            'expires_at' => $request->expires_at,
+        ]);
+
+        return redirect()->route('admin.vouchers.index')->with('success', 'Voucher berhasil diperbarui!');
+    }
+
+    public function destroyVoucher($id)
+    {
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak! Anda bukan admin.');
+
+        $voucher = Coupon::findOrFail($id);
+        $voucher->delete();
+
+        return redirect()->back()->with('success', 'Voucher berhasil dihapus!');
     }
 
     // 3. Tampilan Manajemen Pesanan (Orders)

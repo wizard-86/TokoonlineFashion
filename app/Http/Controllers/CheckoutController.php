@@ -68,20 +68,23 @@ class CheckoutController extends Controller
                 if ($totalItems < 4) {
                     return redirect()->route('checkout.index')->with('error', 'Minimal 4 barang untuk Voucher Gold!');
                 }
-                $voucherDiscount = $subtotal * 0.15; // Diskon 15%
+                $voucherDiscount = $subtotal * 0.15;
             } elseif ($couponCode == 'SILVER10') {
                 if ($totalItems < 2) {
                     return redirect()->route('checkout.index')->with('error', 'Minimal 2 barang untuk Voucher Silver!');
                 }
-                $voucherDiscount = $subtotal * 0.10; // Diskon 10%
+                $voucherDiscount = $subtotal * 0.10;
             } elseif ($couponCode == 'WELCOME5') {
-                $voucherDiscount = $subtotal * 0.05; // Diskon 5%
+                $voucherDiscount = $subtotal * 0.05;
             } else {
-                // Pengecekan database untuk voucher kustom lainnya jika ada
                 $coupon = Coupon::where('code', $couponCode)
-                                ->where('status', 'active')
-                                ->where('min_order', '<=', $subtotal)
-                                ->first();
+                    ->where('status', 'active')
+                    ->where('min_order', '<=', $subtotal)
+                    ->where(function ($query) {
+                        $query->whereNull('expires_at')->orWhere('expires_at', '>=', now());
+                    })
+                    ->first();
+
                 if ($coupon) {
                     $voucherDiscount = ($coupon->type == 'percentage') ? $subtotal * ($coupon->value / 100) : $coupon->value;
                 }
@@ -102,11 +105,22 @@ class CheckoutController extends Controller
         $coinsEarned = floor($totalFinalRupiah / 10000);
 
         // Siapkan daftar voucher yang valid untuk ditampilkan di dropdown checkout
-        $vouchersForSelect = [
+        $dbVouchers = Coupon::where('status', 'active')
+            ->where(function ($query) {
+                $query->whereNull('expires_at')->orWhere('expires_at', '>=', now());
+            })
+            ->get();
+
+        $vouchersForSelect = $dbVouchers->map(function ($coupon) use ($subtotal) {
+            $label = $coupon->code . ' (' . (($coupon->type === 'percentage') ? $coupon->value . '% - ' : 'Rp ' . number_format($coupon->value, 0, ',', '.') . ' - ') . 'Min Order ' . number_format($coupon->min_order, 0, ',', '.') . ')';
+            return ['code' => $coupon->code, 'label' => $label, 'available' => $subtotal >= $coupon->min_order];
+        })->toArray();
+
+        $vouchersForSelect = array_merge([
             ['code' => 'WELCOME5', 'label' => 'WELCOME5 (Diskon 5% - Pengguna Baru)', 'available' => true],
             ['code' => 'SILVER10', 'label' => 'SILVER10 (Diskon 10% - Min 2 Barang)', 'available' => $totalItems >= 2],
             ['code' => 'GOLD15', 'label' => 'GOLD15 (Diskon 15% - Min 4 Barang)', 'available' => $totalItems >= 4],
-        ];
+        ], $vouchersForSelect);
 
         $viewPath = view()->exists('auth.checkout') ? 'auth.checkout' : 'checkout';
 
@@ -178,7 +192,13 @@ class CheckoutController extends Controller
                 } elseif ($request->coupon_code == 'WELCOME5') {
                     $voucherDiscount = $subtotal * 0.05;
                 } else {
-                    $coupon = Coupon::where('code', $request->coupon_code)->where('status', 'active')->first();
+                    $coupon = Coupon::where('code', $request->coupon_code)
+                        ->where('status', 'active')
+                        ->where(function ($query) {
+                            $query->whereNull('expires_at')->orWhere('expires_at', '>=', now());
+                        })
+                        ->first();
+
                     if ($coupon) {
                         $voucherDiscount = ($coupon->type == 'percentage') ? $subtotal * ($coupon->value / 100) : $coupon->value;
                     }

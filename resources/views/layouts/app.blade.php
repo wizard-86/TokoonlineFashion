@@ -64,6 +64,10 @@
 
                 <div class="d-flex align-items-center gap-4">
                     @auth
+                        @if(Auth::user()->role === 'admin')
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold text-uppercase">Dashboard Admin</a>
+                        @endif
+
                         <!-- IKON SEARCH: Diarahkan ke route search asli yang memanggil search2.blade.php -->
                         <a href="{{ route('search') }}" class="text-decoration-none nav-icon {{ request()->routeIs('search') ? 'active-icon' : '' }}" title="Cari Produk">
                             <i class="bi bi-search fs-5"></i>

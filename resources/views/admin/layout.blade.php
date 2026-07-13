@@ -39,6 +39,9 @@
                 <a href="{{ route('admin.orders.index') }}" class="nav-link {{ Request::is('admin/orders*') ? 'active' : '' }}">
                     <i class="bi bi-cart-check me-2"></i> Manajemen Pesanan
                 </a>
+                <a href="{{ route('admin.vouchers.index') }}" class="nav-link {{ Request::is('admin/vouchers*') ? 'active' : '' }}">
+                    <i class="bi bi-ticket-perforated me-2"></i> Manajemen Voucher
+                </a>
                 <a href="/" class="nav-link text-danger mt-5 border-top border-secondary border-opacity-10 pt-3">
                     <i class="bi bi-box-arrow-left me-2"></i> Lihat Toko
                 </a>

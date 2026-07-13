@@ -15,16 +15,22 @@ class DiscountSystemSeeder extends Seeder
         // 1. Tambah Contoh Kupon Diskon Persen & Nominal
         Coupon::updateOrCreate(['code' => 'URBAN10'], [
             'type' => 'percentage',
-            'value' => 10, // Diskon 10%
+            'value' => 10,
             'min_order' => 0,
-            'quota' => 50
+            'quota' => 50,
+            'status' => 'active',
+            'expires_at' => now()->addDays(30),
+            'created_by' => User::first()?->id,
         ]);
 
         Coupon::updateOrCreate(['code' => 'POTONG20'], [
             'type' => 'nominal',
-            'value' => 20000, // Potongan Rp 20.000
-            'min_order' => 150000, // Minimal belanja Rp 150.000
-            'quota' => 30
+            'value' => 20000,
+            'min_order' => 150000,
+            'quota' => 30,
+            'status' => 'active',
+            'expires_at' => now()->addDays(45),
+            'created_by' => User::first()?->id,
         ]);
 
         // 2. Berikan Koin Awal ke User untuk Testing Potongan di Checkout

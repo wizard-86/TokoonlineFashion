@@ -27,6 +27,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/orders/{id}', [AdminController::class, 'show'])->name('orders.show');
     Route::get('/orders/{id}/print', [AdminController::class, 'print'])->name('orders.print'); // Berhasil Ditambahkan
     Route::post('/orders/{id}/update-status', [AdminController::class, 'updateOrderStatus'])->name('orders.updateStatus');
+
+    // Manajemen Voucher
+    Route::get('/vouchers', [AdminController::class, 'vouchers'])->name('vouchers.index');
+    Route::get('/vouchers/create', [AdminController::class, 'createVoucher'])->name('vouchers.create');
+    Route::post('/vouchers/store', [AdminController::class, 'storeVoucher'])->name('vouchers.store');
+    Route::get('/vouchers/{id}/edit', [AdminController::class, 'editVoucher'])->name('vouchers.edit');
+    Route::put('/vouchers/{id}/update', [AdminController::class, 'updateVoucher'])->name('vouchers.update');
+    Route::delete('/vouchers/{id}/delete', [AdminController::class, 'destroyVoucher'])->name('vouchers.destroy');
 });
 
 // === PUBLIC ROUTES ===

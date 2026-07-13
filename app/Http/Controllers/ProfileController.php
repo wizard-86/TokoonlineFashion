@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Coupon;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +28,8 @@ class ProfileController extends Controller
                 'percent' => '15%',
                 'class' => 'border-warning',
                 'is_locked' => $totalCompleted < 4,
-                'requirement' => 'Minimal 4 barang di checkout'
+                'requirement' => 'Minimal 4 barang di checkout',
+                'expiry' => null,
             ],
             [
                 'title' => 'SILVER MEMBER',
@@ -36,7 +38,8 @@ class ProfileController extends Controller
                 'percent' => '10%',
                 'class' => 'border-danger',
                 'is_locked' => $totalCompleted < 2,
-                'requirement' => 'Minimal 2 barang di checkout'
+                'requirement' => 'Minimal 2 barang di checkout',
+                'expiry' => null,
             ],
             [
                 'title' => 'MEMBER BARU',
@@ -45,9 +48,32 @@ class ProfileController extends Controller
                 'percent' => '5%',
                 'class' => 'border-success',
                 'is_locked' => false,
-                'requirement' => 'Bebas kategori'
+                'requirement' => 'Bebas kategori',
+                'expiry' => null,
             ],
         ];
+
+        $dbVouchers = Coupon::where('status', 'active')
+            ->where(function ($query) {
+                $query->whereNull('expires_at')->orWhere('expires_at', '>=', now());
+            })
+            ->latest()
+            ->get();
+
+        foreach ($dbVouchers as $coupon) {
+            $availableVouchers[] = [
+                'title' => 'ADMIN VOUCHER',
+                'desc' => $coupon->type === 'percentage'
+                    ? 'Diskon ' . $coupon->value . '% untuk pembelian Anda'
+                    : 'Potongan Rp ' . number_format($coupon->value, 0, ',', '.'),
+                'code' => $coupon->code,
+                'percent' => $coupon->type === 'percentage' ? $coupon->value . '%' : 'Rp ' . number_format($coupon->value, 0, ',', '.'),
+                'class' => 'border-primary',
+                'is_locked' => false,
+                'requirement' => 'Min order Rp ' . number_format($coupon->min_order, 0, ',', '.'),
+                'expiry' => $coupon->expires_at ? $coupon->expires_at->translatedFormat('d M Y H:i') : null,
+            ];
+        }
 
         // 3. Logika Tab Pesanan (Mendukung status pending dan processing)
         $query = Order::with(['orderDetails.product'])->where('user_id', Auth::id());

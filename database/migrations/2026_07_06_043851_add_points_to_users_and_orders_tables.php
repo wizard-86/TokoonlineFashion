@@ -10,14 +10,24 @@ return new class extends Migration
     {
         // Tambah kolom koin di tabel users (untuk menyimpan saldo koin user)
         Schema::table('users', function (Blueprint $table) {
-            $table->integer('coins')->default(0)->after('email');
+            if (!Schema::hasColumn('users', 'coins')) {
+                $table->integer('coins')->default(0)->after('email');
+            }
         });
 
         // Tambah kolom catatan diskon & poin di tabel orders (untuk riwayat transaksi)
         Schema::table('orders', function (Blueprint $table) {
-            $table->decimal('discount_amount', 15, 2)->default(0)->after('total_harga');
-            $table->integer('coins_used')->default(0)->after('discount_amount');
-            $table->integer('coins_earned')->default(0)->after('coins_used');
+            if (!Schema::hasColumn('orders', 'discount_amount')) {
+                $table->decimal('discount_amount', 15, 2)->default(0)->after('total_harga');
+            }
+
+            if (!Schema::hasColumn('orders', 'coins_used')) {
+                $table->integer('coins_used')->default(0)->after('discount_amount');
+            }
+
+            if (!Schema::hasColumn('orders', 'coins_earned')) {
+                $table->integer('coins_earned')->default(0)->after('coins_used');
+            }
         });
     }
 

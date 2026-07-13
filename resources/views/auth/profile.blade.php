@@ -138,6 +138,11 @@
                                             @else
                                                 <small class="text-success" style="font-size: 0.75rem;"><i class="bi bi-check-circle-fill me-1"></i>Siap Digunakan</small>
                                             @endif
+                                            @if(!empty($voucher['expiry']))
+                                                <div class="mt-2 small text-secondary">
+                                                    <i class="bi bi-calendar-event me-1"></i>Masa berlaku: {{ $voucher['expiry'] }}
+                                                </div>
+                                            @endif
                                         </div>
                                         <div class="text-end ps-3 border-start border-secondary border-opacity-25 my-auto">
                                             <span class="fw-bold text-white fs-5 d-block">{{ $voucher['percent'] }}</span>
