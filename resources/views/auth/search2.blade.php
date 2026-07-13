@@ -46,21 +46,23 @@
                 @foreach($products as $product)
                     <div class="col-6 col-md-4 col-lg-3 product-card-wrapper" data-category="{{ $product->category_id }}">
                         <div class="product-card">
-                            <!-- REVISI: Wadah gambar sekarang bisa diklik menuju detail produk -->
-                            <a href="{{ route('product.detail', $product->id) }}" class="d-block product-img-container">
+                            <a href="{{ route('product.detail', $product->id) }}"
+                               data-product-detail-url="{{ route('product.detail', $product->id) }}?modal=1"
+                               class="d-block product-img-container product-detail-trigger">
                                 <img src="{{ asset('assets/' . ($product->image ?? 'default.png')) }}" alt="{{ $product->name }}" class="product-img">
                             </a>
                             <div class="product-info">
                                 <span class="product-category text-uppercase">{{ $product->category->name ?? 'STREETWEAR' }}</span>
-                                <a href="{{ route('product.detail', $product->id) }}" class="text-decoration-none">
+                                <a href="{{ route('product.detail', $product->id) }}"
+                                   data-product-detail-url="{{ route('product.detail', $product->id) }}?modal=1"
+                                   class="text-decoration-none product-detail-trigger">
                                     <h5 class="fw-bold my-1 text-white product-title-hover text-truncate">{{ $product->name }}</h5>
                                 </a>
                                 <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <span class="fw-bold fs-5 text-primary">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                                    <form action="{{ route('cart.add', $product->id) }}" method="POST" class="m-0">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-premium"><i class="bi bi-plus-lg"></i></button>
-                                    </form>
+                                    <div>
+                                        <span class="fw-bold fs-5 text-primary d-block">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                                        <span class="small text-secondary">Stok: {{ (int) ($product->stock ?? 0) }} pcs</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -34,37 +34,62 @@ class CartController extends Controller
 
     public function store(Request $request, $product_id = null)
     {
-        // Ambil product_id dari parameter URL (tombol +), jika tidak ada baru dari request body
-        $productId = $product_id ?? $request->product_id;
-
-        // Ambil kuantitas dari form, jika lewat tombol "+" langsung otomatis beri nilai 1
-        $quantity = $request->input('quantity', 1);
+        $productId = $product_id ?? $request->input('product_id');
+        $quantity = max(1, (int) $request->input('quantity', 1));
 
         $request->merge([
             'product_id' => $productId,
-            'quantity' => $quantity
+            'quantity' => $quantity,
         ]);
 
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1'
+            'quantity' => 'required|integer|min:1',
         ]);
 
-        $cart = Cart::firstOrCreate(['user_id' => Auth::id()]);
+        $product = Product::findOrFail($productId);
+        $availableStock = (int) ($product->stock ?? 0);
 
+        $cart = Cart::firstOrCreate(['user_id' => Auth::id()]);
         $cartDetail = CartDetail::where('cart_id', $cart->id)
             ->where('product_id', $productId)
             ->first();
 
+        $currentCartQuantity = $cartDetail ? (int) $cartDetail->quantity : 0;
+        $newQuantity = $currentCartQuantity + $quantity;
+
+        if ($availableStock <= 0 || $newQuantity > $availableStock) {
+            $message = 'Stok produk tidak mencukupi. Tersedia ' . $availableStock . ' pcs.';
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                ], 422);
+            }
+
+            return redirect()->back()->with('error', $message);
+        }
+
         if ($cartDetail) {
             $cartDetail->update([
-                'quantity' => $cartDetail->quantity + $quantity
+                'quantity' => $newQuantity,
             ]);
         } else {
             CartDetail::create([
                 'cart_id' => $cart->id,
                 'product_id' => $productId,
-                'quantity' => $quantity
+                'quantity' => $quantity,
+            ]);
+        }
+
+        $cartCount = (int) $cart->cartDetails()->sum('quantity');
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk berhasil ditambahkan ke keranjang!',
+                'cart_count' => $cartCount,
             ]);
         }
 

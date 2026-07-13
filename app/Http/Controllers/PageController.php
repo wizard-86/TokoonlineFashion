@@ -56,10 +56,14 @@ class PageController extends Controller
         return view('auth.search2', compact('products', 'categories'));
     }
 
-    public function productDetail(int $id)
+    public function productDetail(Request $request, int $id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with('category')->findOrFail($id);
         $product->category_name = $product->category ? $product->category->name : 'STREETWEAR';
+
+        if ($request->boolean('modal')) {
+            return view('auth.product_detail_modal', compact('product'));
+        }
 
         return view('auth.product_detail', compact('product'));
     }

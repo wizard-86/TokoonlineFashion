@@ -38,7 +38,9 @@
                     <div class="col-md-3">
                         <div class="product-card border border-secondary p-3 rounded-4 bg-dark h-100 d-flex flex-column justify-content-between position-relative reveal">
                             <!-- MODIFIKASI: Gambar dibungkus link detail -->
-                            <a href="{{ route('product.detail', $product->id) }}" class="product-img-container rounded-3 overflow-hidden mb-3 d-block">
+                            <a href="{{ route('product.detail', $product->id) }}"
+                               data-product-detail-url="{{ route('product.detail', $product->id) }}?modal=1"
+                               class="product-img-container rounded-3 overflow-hidden mb-3 d-block product-detail-trigger">
                                 <img src="{{ asset('assets/' . ($product->image ?? 'default.png')) }}" alt="{{ $product->name }}" class="img-fluid product-img w-100 object-fit-cover" style="height: 280px;">
                             </a>
                             <div class="product-info flex-grow-1 d-flex flex-column justify-content-between">
@@ -46,18 +48,19 @@
                                     <span class="text-primary fw-bold tracking-wide text-uppercase small" style="font-size: 0.75rem;">
                                         {{ $product->category->name ?? 'STREETWEAR' }}
                                     </span>
-                                    <a href="{{ route('product.detail', $product->id) }}" class="text-decoration-none">
+                                    <a href="{{ route('product.detail', $product->id) }}"
+                                       data-product-detail-url="{{ route('product.detail', $product->id) }}?modal=1"
+                                       class="text-decoration-none product-detail-trigger">
                                         <h5 class="fw-bold my-1 text-white text-truncate product-title-hover" title="{{ $product->name }}">
                                             {{ $product->name }}
                                         </h5>
                                     </a>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top border-secondary border-opacity-25">
-                                    <span class="fw-bold fs-5 text-primary">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                                    <form action="{{ route('cart.add', $product->id) }}" method="POST" class="m-0">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-premium"><i class="bi bi-plus-lg"></i></button>
-                                    </form>
+                                    <div>
+                                        <span class="fw-bold fs-5 text-primary d-block">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                                        <span class="small text-secondary">Stok: {{ (int) ($product->stock ?? 0) }} pcs</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

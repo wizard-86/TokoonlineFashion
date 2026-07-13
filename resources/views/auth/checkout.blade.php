@@ -101,6 +101,12 @@
                             <span>-Rp {{ number_format($categoryDiscount, 0, ',', '.') }}</span>
                         </div>
                     @endif
+                    @if(($bundleDiscount ?? 0) > 0)
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span>Diskon Bundle</span>
+                            <span>-Rp {{ number_format($bundleDiscount, 0, ',', '.') }}</span>
+                        </div>
+                    @endif
                     @if(($voucherDiscount ?? 0) > 0)
                         <div class="d-flex justify-content-between mb-2 text-success">
                             <span>Diskon Voucher ({{ $couponCode }})</span>
@@ -110,7 +116,7 @@
                     @if(($coinsUsed ?? 0) > 0)
                         <div class="d-flex justify-content-between mb-2 text-info">
                             <span>Koin Digunakan</span>
-                            <span>-Rp {{ number_format($coinsUsed, 0, ',', '.') }}</span>
+                            <span>-Rp {{ number_format($coinsUsedValue ?? ($coinsUsed * 1000), 0, ',', '.') }}</span>
                         </div>
                     @endif
                     <div class="pt-2 border-top border-secondary d-flex justify-content-between align-items-center">

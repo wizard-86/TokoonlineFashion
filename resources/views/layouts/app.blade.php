@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'URBAN VIBE | Distro & Fashion Store')</title>
     <meta name="description" content="Toko online distro fashion premium dengan koleksi streetwear terbaik.">
 
@@ -97,6 +98,20 @@
     <main style="padding-top: 40px;">
         @yield('content')
     </main>
+
+    <div class="modal fade" id="productDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content bg-dark text-white border border-secondary rounded-4 overflow-hidden">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title fw-bold text-white">Detail Produk</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" id="productDetailModalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed top-50 start-50 translate-middle p-3" id="cartToastContainer" style="z-index: 1060;"></div>
 
     @include('layouts.footer')
 
