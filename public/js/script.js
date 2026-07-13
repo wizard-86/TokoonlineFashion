@@ -1,5 +1,67 @@
 document.addEventListener('DOMContentLoaded', () => {
     const navbar = document.querySelector('.navbar');
+    const cartRows = document.querySelectorAll('.cart-row');
+
+    cartRows.forEach(row => {
+        const editToggle = row.querySelector('.cart-edit-toggle');
+        const cancelEdit = row.querySelector('.cart-cancel-edit');
+        const quantityInput = row.querySelector('.quantity-input');
+        const quantityIncrease = row.querySelector('.quantity-increase');
+        const quantityDecrease = row.querySelector('.quantity-decrease');
+        const sizeSelect = row.querySelector('.cart-edit-size');
+        const hiddenQuantity = row.querySelector('.cart-edit-form input[name="quantity"]');
+        const hiddenSize = row.querySelector('.cart-edit-form input[name="size"]');
+        const viewQuantity = row.querySelector('.cart-view-quantity');
+        const viewSize = row.querySelector('.cart-view-size');
+        const editQuantity = row.querySelector('.cart-edit-quantity');
+        const editActions = row.querySelector('.cart-edit-actions');
+
+        if (!editToggle || !cancelEdit || !quantityInput || !hiddenQuantity || !hiddenSize) {
+            return;
+        }
+
+        const syncInputs = () => {
+            hiddenQuantity.value = quantityInput.value;
+            hiddenSize.value = sizeSelect?.value || hiddenSize.value;
+        };
+
+        const showEditMode = () => {
+            viewQuantity.classList.add('d-none');
+            viewSize.classList.add('d-none');
+            editQuantity.classList.remove('d-none');
+            sizeSelect?.classList.remove('d-none');
+            editActions.classList.remove('d-none');
+            editToggle.classList.add('d-none');
+            syncInputs();
+        };
+
+        const hideEditMode = () => {
+            viewQuantity.classList.remove('d-none');
+            viewSize.classList.remove('d-none');
+            editQuantity.classList.add('d-none');
+            sizeSelect?.classList.add('d-none');
+            editActions.classList.add('d-none');
+            editToggle.classList.remove('d-none');
+        };
+
+        editToggle.addEventListener('click', showEditMode);
+        cancelEdit.addEventListener('click', hideEditMode);
+
+        quantityIncrease.addEventListener('click', () => {
+            const nextValue = Math.max(1, Math.min(Number(quantityInput.value || 1) + 1, Number(quantityInput.max || 999)));
+            quantityInput.value = nextValue;
+            syncInputs();
+        });
+
+        quantityDecrease.addEventListener('click', () => {
+            const nextValue = Math.max(1, Number(quantityInput.value || 1) - 1);
+            quantityInput.value = nextValue;
+            syncInputs();
+        });
+
+        quantityInput.addEventListener('input', syncInputs);
+        sizeSelect?.addEventListener('change', syncInputs);
+    });
     if (navbar) {
         window.addEventListener('scroll', () => {
             if (window.scrollY > 50) {

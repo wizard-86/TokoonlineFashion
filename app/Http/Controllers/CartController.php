@@ -36,23 +36,32 @@ class CartController extends Controller
     {
         $productId = $product_id ?? $request->input('product_id');
         $quantity = max(1, (int) $request->input('quantity', 1));
+        $selectedSize = trim((string) ($request->input('size') ?? ''));
 
         $request->merge([
             'product_id' => $productId,
             'quantity' => $quantity,
+            'size' => $selectedSize,
         ]);
 
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
+            'size' => 'nullable|string|max:20',
         ]);
 
         $product = Product::findOrFail($productId);
         $availableStock = (int) ($product->stock ?? 0);
 
+        if ($selectedSize === '') {
+            $selectedSize = $this->getDefaultSize($product);
+            $request->merge(['size' => $selectedSize]);
+        }
+
         $cart = Cart::firstOrCreate(['user_id' => Auth::id()]);
         $cartDetail = CartDetail::where('cart_id', $cart->id)
             ->where('product_id', $productId)
+            ->where('size', $selectedSize)
             ->first();
 
         $currentCartQuantity = $cartDetail ? (int) $cartDetail->quantity : 0;
@@ -74,12 +83,14 @@ class CartController extends Controller
         if ($cartDetail) {
             $cartDetail->update([
                 'quantity' => $newQuantity,
+                'size' => $selectedSize,
             ]);
         } else {
             CartDetail::create([
                 'cart_id' => $cart->id,
                 'product_id' => $productId,
                 'quantity' => $quantity,
+                'size' => $selectedSize,
             ]);
         }
 
@@ -99,18 +110,45 @@ class CartController extends Controller
     public function update(Request $request, int $id)
     {
         $request->validate([
-            'quantity' => 'required|integer'
+            'quantity' => 'required|integer|min:1',
+            'size' => 'nullable|string|max:20',
         ]);
 
         $cartDetail = CartDetail::findOrFail($id);
+        $product = $cartDetail->product;
+        $availableStock = (int) ($product->stock ?? 0);
 
-        if ($request->quantity <= 0) {
-            $cartDetail->delete();
-            return redirect()->back()->with('success', 'Item dihapus dari keranjang.');
+        if ($availableStock > 0 && $request->quantity > $availableStock) {
+            return redirect()->back()->with('error', 'Stok produk tidak mencukupi. Tersedia ' . $availableStock . ' pcs.');
         }
 
-        $cartDetail->update(['quantity' => $request->quantity]);
-        return redirect()->back()->with('success', 'Kuantitas keranjang berhasil diperbarui.');
+        $selectedSize = trim((string) ($request->input('size') ?? ''));
+        if ($selectedSize === '') {
+            $selectedSize = $this->getDefaultSize($product);
+        }
+
+        $cartDetail->update([
+            'quantity' => $request->quantity,
+            'size' => $selectedSize,
+        ]);
+
+        return redirect()->back()->with('success', 'Item keranjang berhasil diperbarui.');
+    }
+
+    private function getDefaultSize(Product $product): string
+    {
+        if (!empty($product->sizes)) {
+            $sizes = array_values(array_filter(array_map('trim', explode(',', $product->sizes))));
+            if (!empty($sizes)) {
+                return (string) $sizes[0];
+            }
+        }
+
+        if (!empty($product->category) && stripos($product->category->name ?? '', 'sepatu') !== false) {
+            return '38';
+        }
+
+        return 'XL';
     }
 
     public function destroy(int $id)
