@@ -24,12 +24,12 @@ class AuthController extends Controller
     if (Auth::attempt($credentials)) {
         $request->session()->regenerate();
 
-        // Cek jika yang login adalah email admin khusus
-        if ($request->email === 'vikyurbanvibe@gmail.com') {
-            return redirect()->route('admin.dashboard')->with('success', 'Selamat datang Admin Urban Vibe!');
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard')->with('success', 'Selamat datang Admin!');
         }
 
-        // Jika email lain (termasuk viky@gmail.com), arahkan ke halaman utama member
         return redirect()->route('home');
     }
 

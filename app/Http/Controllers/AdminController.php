@@ -13,7 +13,7 @@ class AdminController extends Controller
     // 1. Tampilan Dashboard Utama Admin
     public function dashboard()
     {
-        abort_if(Auth::user()->email !== 'vikyurbanvibe@gmail.com', 403, 'Akses Ditolak! Anda bukan admin.');
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak! Anda bukan admin.');
 
         $totalPendapatan = Order::where('status', 'completed')->sum('total_price');
         $totalPesanan = Order::count();
@@ -26,7 +26,7 @@ class AdminController extends Controller
     // 2. Tampilan Manajemen Produk
     public function products()
     {
-        abort_if(Auth::user()->email !== 'vikyurbanvibe@gmail.com', 403, 'Akses Ditolak! Anda bukan admin.');
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak! Anda bukan admin.');
 
         $products = Product::with('category')->get();
         return view('admin.products', compact('products'));
@@ -35,7 +35,7 @@ class AdminController extends Controller
     // 3. Tampilan Manajemen Pesanan (Orders)
     public function orders()
     {
-        abort_if(Auth::user()->email !== 'vikyurbanvibe@gmail.com', 403, 'Akses Ditolak! Anda bukan admin.');
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak! Anda bukan admin.');
 
         $orders = Order::with('user')->orderBy('created_at', 'desc')->get();
         return view('admin.orders', compact('orders'));
@@ -44,7 +44,7 @@ class AdminController extends Controller
     // Fungsi untuk menampilkan halaman detail data diri pelanggan, barang & cetak resi
     public function show($id)
     {
-        abort_if(Auth::user()->email !== 'vikyurbanvibe@gmail.com', 403, 'Akses Ditolak! Anda bukan admin.');
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak! Anda bukan admin.');
 
         // Mengambil data pesanan beserta detail barang, relasi produk, dan user pembeli
         $order = Order::with(['orderDetails.product', 'user'])->findOrFail($id);
@@ -56,7 +56,7 @@ class AdminController extends Controller
     // Berhasil Ditambahkan: Fungsi cetak resi otomatis menggunakan view detail
     public function print($id)
     {
-        abort_if(Auth::user()->email !== 'vikyurbanvibe@gmail.com', 403, 'Akses Ditolak! Anda bukan admin.');
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak! Anda bukan admin.');
 
         $order = Order::with(['orderDetails.product', 'user'])->findOrFail($id);
 
@@ -66,7 +66,7 @@ class AdminController extends Controller
     // 4. Proses Mengubah Status Pesanan (Pending -> Diproses -> Dikirim)
     public function updateOrderStatus(Request $request, $id)
     {
-        abort_if(Auth::user()->email !== 'vikyurbanvibe@gmail.com', 403, 'Akses Ditolak! Anda bukan admin.');
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak! Anda bukan admin.');
 
         $order = Order::findOrFail($id);
         $order->status = $request->status;
@@ -78,7 +78,7 @@ class AdminController extends Controller
     // 5. Proses Update Stok Cepat via AJAX (+/-)
     public function updateStock(Request $request, $id)
     {
-        abort_if(Auth::user()->email !== 'vikyurbanvibe@gmail.com', 403, 'Akses Ditolak!');
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak!');
 
         $product = Product::findOrFail($id);
         $product->stock = $request->stock;
@@ -90,7 +90,7 @@ class AdminController extends Controller
     // 6. Tampilan Halaman Edit Produk
     public function edit($id)
     {
-        abort_if(Auth::user()->email !== 'vikyurbanvibe@gmail.com', 403, 'Akses Ditolak!');
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak!');
 
         $product = Product::findOrFail($id);
         $categories = \App\Models\Category::all();
@@ -101,7 +101,7 @@ class AdminController extends Controller
     // 7. Proses Simpan Perubahan Edit Produk
     public function updateProduct(Request $request, $id)
     {
-        abort_if(Auth::user()->email !== 'vikyurbanvibe@gmail.com', 403, 'Akses Ditolak!');
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak!');
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -131,7 +131,7 @@ class AdminController extends Controller
     // 8. Tampilan Halaman Tambah Produk Baru
     public function create()
     {
-        abort_if(Auth::user()->email !== 'vikyurbanvibe@gmail.com', 403, 'Akses Ditolak!');
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak!');
 
         $categories = \App\Models\Category::all();
         return view('admin.create_product', compact('categories'));
@@ -140,7 +140,7 @@ class AdminController extends Controller
     // 9. Proses Simpan Produk Baru ke Database
     public function storeProduct(Request $request)
     {
-        abort_if(Auth::user()->email !== 'vikyurbanvibe@gmail.com', 403, 'Akses Ditolak!');
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak!');
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -172,7 +172,7 @@ class AdminController extends Controller
     // 10. Proses Hapus Produk dari Database
     public function destroyProduct($id)
     {
-        abort_if(Auth::user()->email !== 'vikyurbanvibe@gmail.com', 403, 'Akses Ditolak!');
+        abort_if(Auth::user()->role !== 'admin', 403, 'Akses Ditolak!');
 
         $product = Product::findOrFail($id);
         $product->delete();
